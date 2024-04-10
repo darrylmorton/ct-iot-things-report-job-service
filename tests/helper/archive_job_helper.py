@@ -4,15 +4,15 @@ import time
 import uuid
 from typing import Any
 
-from tests.helper.helper import validate_uuid4
-from things_report_job_service.service import ThingsReportJobService
-from util.service_util import create_archive_job_message
+from ..helper.helper import validate_uuid4
+from src.things_report_job_service.service import ThingsReportJobService
+from src.util.service_util import create_archive_job_message
 
 log = logging.getLogger("test_things_report_job_service")
 
 
 def expected_archive_job_message(message: Any):
-    message_body = json.loads(message['MessageBody'])
+    message_body = json.loads(message["MessageBody"])
 
     message_id = uuid.uuid4()
     job_path_prefix = f"{message_body['UserId']}/{message_body['ReportName']}"
@@ -39,7 +39,9 @@ def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
             job_service.consume()
 
 
-def report_archive_job_consumer(report_archive_job_queue: Any, timeout_seconds=0) -> Any:
+def report_archive_job_consumer(
+    report_archive_job_queue: Any, timeout_seconds=0
+) -> Any:
     timeout = time.time() + timeout_seconds
     messages = []
 

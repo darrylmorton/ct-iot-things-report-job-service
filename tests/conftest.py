@@ -1,12 +1,14 @@
 import os
 
+import boto3
 import pytest
 from boto3 import dynamodb
+from moto import mock_sqs
 
-from tests.helper.data_helper import create_table
+# from tests.helper.data_helper import create_table
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def aws_credentials():
     """Mocked AWS Credentials for moto."""
     os.environ["AWS_ACCESS_KEY_ID"] = "testing"
@@ -16,6 +18,13 @@ def aws_credentials():
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
 
 
-@pytest.fixture(scope="function")
-def setup_db(db_client: dynamodb):
-    create_table(db_client)
+@pytest.fixture
+def sqs_client(aws_credentials):
+    with mock_sqs():
+        conn = boto3.client("sqs", region_name="eu-west-2")
+        yield conn
+
+
+# @pytest.fixture(scope="function")
+# def setup_db(db_client: dynamodb):
+#     create_table(db_client)

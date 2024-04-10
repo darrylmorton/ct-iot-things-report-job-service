@@ -14,10 +14,10 @@ def get_date_range_days(start: datetime, end: datetime) -> int:
 
 
 def create_archive_job_message(
-        message_id: str,
-        user_id: str,
-        report_name: str,
-        job_path: str,
+    message_id: str,
+    user_id: str,
+    report_name: str,
+    job_path: str,
 ):
     return {
         "Id": message_id,

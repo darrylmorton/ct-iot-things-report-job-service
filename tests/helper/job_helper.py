@@ -4,13 +4,14 @@ import logging
 import time
 import uuid
 from typing import Any
-from things_report_job_service.service import ThingsReportJobService
-from util.service_util import create_report_timestamp, get_date_range_days
+
+from src.things_report_job_service.service import ThingsReportJobService
+from src.util.service_util import create_report_timestamp, get_date_range_days
 
 log = logging.getLogger("test_things_report_job_service")
 
 
-def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
+async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
     timeout = time.time() + timeout_seconds
 
     while True:
@@ -18,18 +19,18 @@ def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
             log.info(f"Task timed out after {timeout_seconds}")
             break
         else:
-            job_service.consume()
+            await job_service.consume()
 
 
 def create_job_message(
-        message_id: str,
-        user_id: str,
-        report_name: str,
-        start_timestamp: str,
-        end_timestamp: str,
-        job_index: str,
-        total_jobs: str,
-        archive_report: str
+    message_id: str,
+    user_id: str,
+    report_name: str,
+    start_timestamp: str,
+    end_timestamp: str,
+    job_index: str,
+    total_jobs: str,
+    archive_report: str,
 ):
     return {
         "Id": message_id,
@@ -132,7 +133,7 @@ def create_job_messages(total: int, offset=0):
                 "DateRangeDays": {
                     "DataType": "String",
                     "StringValue": str(date_range_days),
-                }
+                },
             },
             "MessageBody": json.dumps({
                 "Id": str(message_id),
@@ -155,7 +156,7 @@ def expected_job_messages(messages: Any):
     job_messages = []
 
     for message in messages:
-        message_body = json.loads(message['MessageBody'])
+        message_body = json.loads(message["MessageBody"])
 
         start_timestamp_iso = message_body["StartTimestamp"]
         start_timestamp = create_report_timestamp(start_timestamp_iso)
@@ -184,7 +185,7 @@ def expected_job_messages(messages: Any):
                 end_timestamp=job_end_date.isoformat(),
                 job_index=str(index),
                 total_jobs=str(total_jobs),
-                archive_report=str(archive_report)
+                archive_report=str(archive_report),
             )
 
             job_messages.append(job_message)

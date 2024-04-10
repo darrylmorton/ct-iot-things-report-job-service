@@ -12,8 +12,7 @@ def create_sqs_queue(queue_name: str):
     sqs = boto3.resource("sqs", region_name="eu-west-2")
 
     queue = sqs.create_queue(
-        QueueName=f"{queue_name}.fifo",
-        Attributes={'DelaySeconds': '5'}
+        QueueName=f"{queue_name}.fifo", Attributes={"DelaySeconds": "5"}
     )
 
     return queue

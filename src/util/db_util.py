@@ -1,6 +1,6 @@
 import boto3
 
-from config import THINGS_DB_NAME, AWS_REGION
+from ..config import THING_PAYLOADS_DB_NAME, AWS_REGION
 
 dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
 
@@ -14,10 +14,10 @@ dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
 
 
 async def query_by_device_id(device_id: str):
-    table = dynamodb.Table(THINGS_DB_NAME)
+    table = dynamodb.Table(THING_PAYLOADS_DB_NAME)
 
     resource = table.query({
-        "TableName": THINGS_DB_NAME,
+        "TableName": THING_PAYLOADS_DB_NAME,
         "IndexName": "deviceIdIndex",
         "KeyConditionExpression": "deviceId = :deviceId",
         "ExpressionAttributeValues": {":deviceId": device_id},

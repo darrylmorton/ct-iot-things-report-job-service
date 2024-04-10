@@ -6,10 +6,10 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-from config import THINGS_REPORT_JOB_QUEUE, AWS_REGION, THINGS_REPORT_ARCHIVE_JOB_QUEUE
-from util.db_util import query_by_device_id
-from util.s3_util import create_csv_writer
-from util.service_util import create_archive_job_message
+from ..config import THINGS_REPORT_JOB_QUEUE, AWS_REGION
+from ..crud import find_thing_payloads
+from ..util.s3_util import create_csv_writer
+from ..util.service_util import create_archive_job_message
 
 log = logging.getLogger("things_report_job_service")
 
@@ -17,16 +17,19 @@ log = logging.getLogger("things_report_job_service")
 class ThingsReportJobService:
     def __init__(self):
         self.sqs = boto3.resource("sqs", region_name=AWS_REGION)
-        self.s3_client = boto3.client("s3", region_name=AWS_REGION)
+        # self.s3_client = boto3.client("s3", region_name=AWS_REGION)
         self.report_job_queue = self.sqs.Queue(f"{THINGS_REPORT_JOB_QUEUE}.fifo")
-        self.report_archive_job_queue = self.sqs.Queue(f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo")
+        # self.report_archive_job_queue = self.sqs.Queue(f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo")
 
-    def poll(self):
+    async def poll(self):
+        print(f"*** POLLING...")
+
         while True:
-            self.consume()
+            await self.consume()
 
     async def consume(self):
-        log.info(f"CONSUMING JOB MESSAGES...")
+        log.info(f"*** CONSUMING JOB MESSAGES...")
+        # print(f"*** CONSUMING JOB MESSAGES...")
 
         try:
             job_messages = self.report_job_queue.receive_messages(
@@ -35,28 +38,34 @@ class ThingsReportJobService:
                 WaitTimeSeconds=5,
             )
 
-            log.info(f"CONSUMING JOB MESSAGES: {len(job_messages)}")
+            log.info(f"*** *** CONSUMING JOB MESSAGES: {len(job_messages)}")
 
             if len(job_messages) > 0:
                 for job_message in job_messages:
                     message_body = json.loads(job_message.body)
 
-                    log.debug('message_body', message_body)
+                    log.debug("message_body", message_body)
 
                     report_name = message_body["ReportName"]
                     user_id = message_body["UserId"]
                     device_id = message_body["DeviceId"]
 
-                    result = await query_by_device_id(device_id)
+                    result = await find_thing_payloads()
+                    # log.info(f"*** result: {len(result)}")
+                    log.info(f"*** result: {result}")
 
-                    job_path_prefix = f"{message_body["UserId"]}/{message_body["ReportName"]}"
+                    job_path_prefix = (
+                        f"{message_body["UserId"]}/{message_body["ReportName"]}"
+                    )
                     job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
                     job_path = f"{job_path_prefix}/{job_path_suffix}"
 
                     csv_writer = create_csv_writer(f"{job_path}.csv")
 
                     for item in result:
-                        thing_payload = await query_by_device_id(device_id)
+                        log.info(f"*** item: {len(job_messages)}")
+
+                        # thing_payload = await query_by_device_id(device_id)
                         payload = item["payload"]
                         cadence = payload["cadence"]
                         battery = payload["battery"]
@@ -66,11 +75,11 @@ class ThingsReportJobService:
                         csv_writer.writerow({
                             "report_name": report_name,
                             "user_id": user_id,
-                            "id": thing_payload["id"],
-                            "device_id": thing_payload["deviceId"],
-                            "thing_name": thing_payload["thingName"],
-                            "thing_type": thing_payload["thingType"],
-                            "payload_timestamp": thing_payload["payloadTimestamp"],
+                            # "id": thing_payload["id"],
+                            "device_id": payload["deviceId"],
+                            # "thing_name": thing_payload["thingName"],
+                            # "thing_type": thing_payload["thingType"],
+                            "payload_timestamp": payload["payloadTimestamp"],
                             "cadence_value": cadence["value"],
                             "cadence_unit": cadence["unit"],
                             "battery_value": battery["value"],
@@ -93,10 +102,12 @@ class ThingsReportJobService:
                                 job_path=str(job_path),
                             )
 
-                            self.produce(archive_message)
+                            # self.produce(archive_message)
 
                     job_message.delete()
         except ClientError as error:
+            log.info(f"Couldn't receive report_job_queue messages error {error}")
+
             log.error(f"Couldn't receive report_job_queue messages error {error}")
 
             raise error
@@ -104,10 +115,14 @@ class ThingsReportJobService:
     def produce(self, archive_job_messages: Any) -> Any:
         try:
             if len(archive_job_messages) > 0:
-                self.report_archive_job_queue.send_messages(Entries=archive_job_messages)
+                self.report_archive_job_queue.send_messages(
+                    Entries=archive_job_messages
+                )
 
             return archive_job_messages
         except ClientError as error:
-            log.error(f"Couldn't receive report_archive_job_queue messages error {error}")
+            log.error(
+                f"Couldn't receive report_archive_job_queue messages error {error}"
+            )
 
             raise error
