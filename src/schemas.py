@@ -1,31 +1,22 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel
 
 
-class Cadence(BaseModel):
+class PayloadValueUnit(BaseModel):
     value: str
     unit: str
 
 
-class Battery(BaseModel):
-    value: str
-    unit: str
-
-
-class Temperature(BaseModel):
-    value: str
-    unit: str
-
-
-class Humidity(BaseModel):
-    value: str
-    unit: str
+class Temperature(PayloadValueUnit):
     connection: str
+
+
+class Humidity(Temperature):
     precipitation: bool
 
 
 class Payload(BaseModel):
-    cadence: Cadence
-    battery: Battery
+    cadence: PayloadValueUnit
+    battery: PayloadValueUnit
     temperature: Temperature
     humidity: Humidity
 
@@ -34,6 +25,4 @@ class ThingPayload(BaseModel):
     id: str
     device_id: str
     thing_payload: Payload
-    payload_timestamp: str
-    # start_timestamp: str
-    # end_timestamp: str
+    payload_timestamp: int

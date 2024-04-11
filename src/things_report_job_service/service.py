@@ -6,6 +6,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
+from schemas import ThingPayload
 from ..config import THINGS_REPORT_JOB_QUEUE, AWS_REGION
 from ..crud import find_thing_payloads
 from ..util.s3_util import create_csv_writer
@@ -22,13 +23,13 @@ class ThingsReportJobService:
         # self.report_archive_job_queue = self.sqs.Queue(f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo")
 
     async def poll(self):
-        print(f"*** POLLING...")
+        print("*** POLLING...")
 
         while True:
             await self.consume()
 
     async def consume(self):
-        log.info(f"*** CONSUMING JOB MESSAGES...")
+        log.info("*** CONSUMING JOB MESSAGES...")
         # print(f"*** CONSUMING JOB MESSAGES...")
 
         try:

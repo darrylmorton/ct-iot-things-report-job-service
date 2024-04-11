@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from src.config import THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_ARCHIVE_JOB_QUEUE
+from src.config import THINGS_REPORT_JOB_QUEUE
 from src.things_report_job_service.service import ThingsReportJobService
 
 from ..helper.helper import create_sqs_queue

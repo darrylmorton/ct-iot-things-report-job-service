@@ -1,6 +1,6 @@
 import boto3
 
-from src.config import THING_PAYLOADS_DB_NAME, AWS_REGION
+from src.config import AWS_REGION
 
 dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
 

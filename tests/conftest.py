@@ -2,7 +2,6 @@ import os
 
 import boto3
 import pytest
-from boto3 import dynamodb
 from moto import mock_aws
 
 # from tests.helper.data_helper import create_table

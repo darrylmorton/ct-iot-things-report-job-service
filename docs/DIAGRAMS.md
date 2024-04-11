@@ -1,18 +1,18 @@
 ```mermaid
 ---
-title: From Report Request to Report Job
+title: SQS Message Queues and SQS Messages
 ---
 
 classDiagram
     class ReportJobMessage {
-        +String : Id
-        +String : UserId
-        +String : ReportName
-        +String : StartTimestamp
-        +String : EndTimestamp
-        +String : JobIndex
-        +String : TotalJobs
-        +String : ArchiveReport
+        +String: Id
+        +String: UserId
+        +String: ReportName
+        +String: StartTimestamp
+        +String: EndTimestamp
+        +String: JobIndex
+        +String: TotalJobs
+        +String: ArchiveReport
     }
 
     note for ReportJobMessage "Report Job Queue 
@@ -20,15 +20,70 @@ classDiagram
     (message schema)"
 
     class ReportArchiveJobMessage {
-        +String : Id
-        +String : UserId
-        +String : ReportName
-        +String : JobPath
+        +String: Id
+        +String: UserId
+        +String: ReportName
+        +String: JobPath
     }
     
     note for ReportArchiveJobMessage "Report Archive Job Queue
     
     (message schema)"
+```
+
+```mermaid
+---
+title: From (SQLAlchemy) ThingPayloadModel to (Pydantic) ThingPayload Schema
+---
+
+classDiagram
+    class PayloadUnitValue {
+        +str: value
+        +str: unit
+    }
+
+    class Temperature {
+        +str: connection
+    }
+    
+    PayloadUnitValue <|-- Temperature 
+    
+    class Humidity {
+        +bool: precipitation
+    }
+    
+    PayloadUnitValue <|-- Humidity
+    
+    class Payload {
+        +PayloadValueUnit: cadence
+        +PayloadValueUnit: battery
+        +Temperature: temperature
+        +Humidity: humidity
+    }
+    
+    Payload *-- PayloadUnitValue
+    Payload *-- Temperature
+    Payload *-- Humidity
+    
+    class ThingPayload {
+        +str: id
+        +str: device_id
+        +int: payload_timestamp
+        +Payload: payload
+    }
+    
+    Payload *-- ThingPayload
+    
+    class ThingPayloadModel {
+        +uuid: id
+        +varchar: device_id
+        +integer: payload_timestamp
+        +jsonb: payload
+        +timestamp with time zone: updated_at
+        +timestamp with time zone: created_at
+    }
+    
+    ThingPayload -- ThingPayloadModel
 ```
 
 ```mermaid
