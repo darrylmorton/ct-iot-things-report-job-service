@@ -1,8 +1,14 @@
 import csv
+import os
 
 
-def create_csv_writer(filename: str):
-    with open(filename, "w", newline="") as csvfile:
+def create_csv_writer(job_path_prefix: str, job_path_suffix: str, filename: str):
+    if not os.path.exists(f"./{job_path_prefix}/{job_path_suffix}/"):
+        os.makedirs(f"./{job_path_prefix}/{job_path_suffix}/")
+
+    job_file_path = f"./{job_path_prefix}/{job_path_suffix}/{filename}"
+
+    with open(job_file_path, "w", newline="") as csvfile:
         fieldnames = [
             "report_name",
             "user_id",

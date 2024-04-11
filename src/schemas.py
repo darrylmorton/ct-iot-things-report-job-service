@@ -31,9 +31,9 @@ class Payload(BaseModel):
 
 
 class ThingPayload(BaseModel):
-    id: int
-    device_id: int
+    id: str
+    device_id: str
     thing_payload: Payload
-    payload_timestamp: int
-    start_timestamp: str
-    end_timestamp: str
+    payload_timestamp: str
+    # start_timestamp: str
+    # end_timestamp: str

@@ -3,7 +3,7 @@ import os
 import boto3
 import pytest
 from boto3 import dynamodb
-from moto import mock_sqs
+from moto import mock_aws
 
 # from tests.helper.data_helper import create_table
 
@@ -20,7 +20,7 @@ def aws_credentials():
 
 @pytest.fixture
 def sqs_client(aws_credentials):
-    with mock_sqs():
+    with mock_aws():
         conn = boto3.client("sqs", region_name="eu-west-2")
         yield conn
 

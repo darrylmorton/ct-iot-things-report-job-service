@@ -17,5 +17,8 @@ class ThingPayloadsModel(Base):
     payload_timestamp = Column(DATETIME, nullable=False)
     # start_timestamp = Column(DATETIME, nullable=False)
     # end_timestamp = Column(DATETIME, nullable=False)
-    updated_at = Column(DATETIME, nullable=False, default=datetime.now())
-    created_at = Column(DATETIME, nullable=False, default=datetime.now())
+    # updated_at = Column(DATETIME, nullable=False, default=datetime.now())
+    # created_at = Column(DATETIME, nullable=False, default=datetime.now())
+
+
+# updated_at: Mapped[datetime] = MappedColumn(nullable=False, default=datetime.now())

@@ -41,6 +41,16 @@ class ThingsReportJobService:
             log.info(f"*** *** CONSUMING JOB MESSAGES: {len(job_messages)}")
 
             if len(job_messages) > 0:
+                job_path_prefix = "dist"
+                job_path_suffix = "test3"
+                job_filename = "test3"
+                # job_path = f"dist/test/test"
+                # log.info(f"*** job_path: {job_path}")
+
+                csv_writer = create_csv_writer(
+                    job_path_prefix, job_path_suffix, f"{job_filename}.csv"
+                )
+
                 for job_message in job_messages:
                     message_body = json.loads(job_message.body)
 
@@ -50,23 +60,28 @@ class ThingsReportJobService:
                     user_id = message_body["UserId"]
                     device_id = message_body["DeviceId"]
 
-                    result = await find_thing_payloads()
+                    things_payloads_result: list[
+                        ThingPayload
+                    ] = await find_thing_payloads()
                     # log.info(f"*** result: {len(result)}")
-                    log.info(f"*** result: {result}")
 
-                    job_path_prefix = (
-                        f"{message_body["UserId"]}/{message_body["ReportName"]}"
-                    )
-                    job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
-                    job_path = f"{job_path_prefix}/{job_path_suffix}"
+                    result = things_payloads_result
+                    log.info(f"*** result: {result[0].id}")
 
-                    csv_writer = create_csv_writer(f"{job_path}.csv")
+                    # job_path_prefix = (
+                    #     f"{message_body["UserId"]}/{message_body["ReportName"]}"
+                    # )
+                    # job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
+                    # job_path_prefix = (
+                    #     f"{message_body["UserId"]}/{message_body["ReportName"]}"
+                    # )
+                    # job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
 
                     for item in result:
-                        log.info(f"*** item: {len(job_messages)}")
+                        # log.info(f"*** item: {len(job_messages)}")
 
                         # thing_payload = await query_by_device_id(device_id)
-                        payload = item["payload"]
+                        payload = item.payload
                         cadence = payload["cadence"]
                         battery = payload["battery"]
                         temperature = payload["temperature"]
@@ -76,7 +91,7 @@ class ThingsReportJobService:
                             "report_name": report_name,
                             "user_id": user_id,
                             # "id": thing_payload["id"],
-                            "device_id": payload["deviceId"],
+                            "device_id": payload["device_id"],
                             # "thing_name": thing_payload["thingName"],
                             # "thing_type": thing_payload["thingType"],
                             "payload_timestamp": payload["payloadTimestamp"],
