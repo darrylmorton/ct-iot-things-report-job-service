@@ -46,13 +46,9 @@ classDiagram
         +str: connection
     }
     
-    PayloadUnitValue <|-- Temperature 
-    
     class Humidity {
         +bool: precipitation
     }
-    
-    PayloadUnitValue <|-- Humidity
     
     class Payload {
         +PayloadValueUnit: cadence
@@ -61,18 +57,12 @@ classDiagram
         +Humidity: humidity
     }
     
-    Payload *-- PayloadUnitValue
-    Payload *-- Temperature
-    Payload *-- Humidity
-    
     class ThingPayload {
         +str: id
         +str: device_id
         +int: payload_timestamp
         +Payload: payload
     }
-    
-    Payload *-- ThingPayload
     
     class ThingPayloadModel {
         +uuid: id
@@ -83,7 +73,15 @@ classDiagram
         +timestamp with time zone: created_at
     }
     
-    ThingPayload -- ThingPayloadModel
+    PayloadUnitValue <|-- Humidity
+    PayloadUnitValue <|-- Temperature
+    
+    Payload *-- PayloadUnitValue
+    Payload *-- Temperature
+    Payload *-- Humidity
+    Payload *-- ThingPayload
+    
+    ThingPayload .. ThingPayloadModel
 ```
 
 ```mermaid
