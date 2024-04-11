@@ -15,7 +15,7 @@ def expected_archive_job_message(message: Any):
     message_body = json.loads(message["MessageBody"])
 
     message_id = uuid.uuid4()
-    job_path_prefix = f"{message_body['UserId']}/{message_body['ReportName']}"
+    job_path_prefix = f"{message_body["UserId"]}/{message_body["ReportName"]}"
     job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
     job_path = f"{job_path_prefix}/{job_path_suffix}"
     job_path = f"{job_path}.zip"
