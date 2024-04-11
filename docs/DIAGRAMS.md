@@ -73,8 +73,8 @@ classDiagram
         +timestamp with time zone: created_at
     }
     
-    PayloadUnitValue <|-- Humidity
     PayloadUnitValue <|-- Temperature
+    Temperature <|-- Humidity
     
     Payload *-- PayloadUnitValue
     Payload *-- Temperature
