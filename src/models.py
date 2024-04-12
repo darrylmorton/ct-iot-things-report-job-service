@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from .database import Base
 
 
-class ThingPayloadsModel(Base):
+class ThingPayloadModel(Base):
     __tablename__ = "thing_payloads"
 
     id = Column(String, primary_key=True, index=True)

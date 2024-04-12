@@ -6,7 +6,7 @@ log = logging.getLogger("things_report_job_service")
 
 
 def create_report_timestamp(iso_date: str) -> datetime:
-    return datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S")
+    return datetime.datetime.strptime(iso_date, "%Y-%m-%d %H:%M:%S")
 
 
 def get_date_range_days(start: datetime, end: datetime) -> int:

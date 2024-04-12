@@ -2,13 +2,13 @@ from sqlalchemy import select
 
 from .schemas import ThingPayload
 from .database import async_session
-from .models import ThingPayloadsModel
+from .models import ThingPayloadModel
 
 
 async def find_thing_payloads() -> list[ThingPayload]:
     async with async_session() as session:
         async with session.begin():
-            stmt = select(ThingPayloadsModel)
+            stmt = select(ThingPayloadModel)
             result = await session.execute(stmt)
             await session.close()
 

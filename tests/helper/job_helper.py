@@ -90,62 +90,40 @@ def create_job_messages(total: int, offset=0):
     for counter in range(total):
         index = counter + offset
 
-        start_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00"
+        start_timestamp_isoformat = f"20{year_delta}-01-01 00:00:00"
         start_timestamp = create_report_timestamp(start_timestamp_isoformat)
 
         year_delta = year_delta + 1
-        end_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00"
+        end_timestamp_isoformat = f"20{year_delta}-01-01 00:00:00"
 
         end_timestamp = create_report_timestamp(end_timestamp_isoformat)
 
         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
 
-        message_id = uuid.uuid4()
-        user_id = uuid.uuid4()
+        message_id = str(uuid.uuid4())
+        user_id = str(uuid.uuid4())
+        archive_report = index > date_range_days - 1
 
-        messages.append({
-            "Id": str(message_id),
-            "MessageAttributes": {
-                "Id": {
-                    "DataType": "String",
-                    "StringValue": str(message_id),
-                },
-                "UserId": {
-                    "DataType": "String",
-                    "StringValue": str(user_id),
-                },
-                "ReportName": {
-                    "DataType": "String",
-                    "StringValue": f"report_name_{index}",
-                },
-                "DeviceId": {
-                    "DataType": "String",
-                    "StringValue": device_id,
-                },
-                "StartTimestamp": {
-                    "DataType": "String",
-                    "StringValue": start_timestamp_isoformat,
-                },
-                "EndTimestamp": {
-                    "DataType": "String",
-                    "StringValue": end_timestamp_isoformat,
-                },
-                "DateRangeDays": {
-                    "DataType": "String",
-                    "StringValue": str(date_range_days),
-                },
-            },
-            "MessageBody": json.dumps({
-                "Id": str(message_id),
-                "UserId": str(user_id),
-                "ReportName": f"report_name_{index}",
-                "DeviceId": device_id,
-                "StartTimestamp": start_timestamp_isoformat,
-                "EndTimestamp": end_timestamp_isoformat,
-                "DateRangeDays": str(date_range_days),
-            }),
-            "MessageDeduplicationId": str(message_id),
-        })
+        log.info(f"{start_timestamp}")
+        log.info(f"{end_timestamp}")
+
+        log.info(f"{date_range_days}")
+        log.info(f"{archive_report}")
+
+        log.info(f"{message_id}")
+        log.info(f"{user_id}")
+
+        job_message = create_job_message(
+            message_id,
+            user_id,
+            report_name=f"report_name_0",
+            start_timestamp=f"{start_timestamp}",
+            end_timestamp=f"{end_timestamp}",
+            job_index=f"{index}",
+            total_jobs=f"{date_range_days}",
+            archive_report=f"{archive_report}",
+        )
+        messages.append(job_message)
 
         year_delta = year_delta + 1
 
@@ -193,74 +171,10 @@ def expected_job_messages(messages: Any):
     return job_messages
 
 
-# def create_job_messages(total: int, offset=0):
-#     messages = []
-#     year_delta = 10
-#
-#     for counter in range(total):
-#         index = counter + offset
-#
-#         start_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00"
-#         start_timestamp = create_report_timestamp(start_timestamp_isoformat)
-#
-#         year_delta = year_delta + 1
-#         end_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00"
-#
-#         end_timestamp = create_report_timestamp(end_timestamp_isoformat)
-#
-#         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
-#
-#         message_id = uuid.uuid4()
-#         user_id = uuid.uuid4()
-#
-#         messages.append({
-#             "Id": str(message_id),
-#             "MessageAttributes": {
-#                 "Id": {
-#                     "DataType": "String",
-#                     "StringValue": str(message_id),
-#                 },
-#                 "UserId": {
-#                     "DataType": "String",
-#                     "StringValue": str(user_id),
-#                 },
-#                 "ReportName": {
-#                     "DataType": "String",
-#                     "StringValue": f"report_name_{index}",
-#                 },
-#                 "StartTimestamp": {
-#                     "DataType": "String",
-#                     "StringValue": start_timestamp_isoformat,
-#                 },
-#                 "EndTimestamp": {
-#                     "DataType": "String",
-#                     "StringValue": end_timestamp_isoformat,
-#                 },
-#                 "DateRangeDays": {
-#                     "DataType": "String",
-#                     "StringValue": str(date_range_days),
-#                 }
-#             },
-#             "MessageBody": json.dumps({
-#                 "Id": str(message_id),
-#                 "UserId": str(user_id),
-#                 "ReportName": f"report_name_{index}",
-#                 "StartTimestamp": start_timestamp_isoformat,
-#                 "EndTimestamp": end_timestamp_isoformat,
-#                 "DateRangeDays": str(date_range_days),
-#             }),
-#             "MessageDeduplicationId": str(message_id),
-#         })
-#
-#         year_delta = year_delta + 1
-#
-#     return messages
-#
-#
-# def assert_job_messages(actual_result: Any, expected_result: Any):
-#     assert len(actual_result) == len(expected_result)
-#     index = 0
-#
-#     for request_message in actual_result:
-#         assert request_message.body == expected_result[index]["MessageBody"]
-#         index = index + 1
+def assert_job_messages(actual_result: Any, expected_result: Any):
+    assert len(actual_result) == len(expected_result)
+    index = 0
+
+    for request_message in actual_result:
+        assert request_message.body == expected_result[index]["MessageBody"]
+        index = index + 1

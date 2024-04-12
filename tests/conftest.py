@@ -2,9 +2,18 @@ import os
 
 import boto3
 import pytest
+from dotenv import load_dotenv
 from moto import mock_aws
 
+load_dotenv(dotenv_path=".env.test")
+
+# import config
 # from tests.helper.data_helper import create_table
+
+
+# @pytest.fixture
+# def test_environment_variables():
+#     os.environ["THINGS_REPORT_JOB_BUCKET_NAME"] = "./dist"
 
 
 @pytest.fixture
