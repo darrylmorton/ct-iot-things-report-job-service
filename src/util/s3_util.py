@@ -1,5 +1,6 @@
 import csv
 import datetime
+import json
 import logging
 import os
 from typing import Any
@@ -74,8 +75,7 @@ async def create_csv_writer(
         csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         csv_writer.writeheader()
 
-        result = await create_csv_rows(user_id)
-        csv_writer.writerows(result)
+        return csv_writer
 
 
 def create_csv_report_job_path(
@@ -90,7 +90,17 @@ def create_csv_report_job_path(
         end_timestamp, datetime_format
     ).timestamp()
 
-    report_job_path = f"{THINGS_REPORT_JOB_BUCKET_NAME}/{user_id}/{report_name}-{int(start_timestamp)}-{int(end_timestamp)}"
+    report_job_path = (
+        f"{user_id}/{report_name}-{int(start_timestamp)}-{int(end_timestamp)}"
+    )
     report_job_filename = f"{report_name}-{job_index}.csv"
 
     return report_job_path, report_job_filename
+
+
+def s3_upload_report_job(s3_client: Any, data: Any, key: str):
+    return s3_client.put_object(
+        Bucket="ct-iot-thing-report-jobs",  # THINGS_REPORT_JOB_BUCKET_NAME,
+        Body=json.dumps(data),
+        Key=key,
+    )
