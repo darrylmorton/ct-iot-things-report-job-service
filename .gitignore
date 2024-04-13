@@ -4,6 +4,6 @@
 venv/
 .coverage
 **/__pycache__
-.env
+.env.*
 htmlcov/
 dist/
