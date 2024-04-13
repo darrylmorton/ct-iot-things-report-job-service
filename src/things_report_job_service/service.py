@@ -1,21 +1,17 @@
 import json
 import logging
-import uuid
 from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
 
-from ..schemas import ThingPayload
-from ..config import THINGS_REPORT_JOB_QUEUE, AWS_REGION, THINGS_REPORT_JOB_BUCKET_NAME
-from ..crud import find_thing_payloads
+from ..config import THINGS_REPORT_JOB_QUEUE, AWS_REGION, THINGS_REPORT_ARCHIVE_JOB_QUEUE
 from ..util.s3_util import (
     create_csv_writer,
     create_csv_rows,
     create_csv_report_job_path,
-    s3_upload_report_job,
+    s3_upload_csv,
 )
-from ..util.service_util import create_archive_job_message
 
 log = logging.getLogger("things_report_job_service")
 
@@ -28,10 +24,14 @@ class ThingsReportJobService:
         # self.report_archive_job_queue = self.sqs.Queue(f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo")
 
     async def poll(self):
+        log.debug(f"Polling...")
+
         while True:
             await self.consume()
 
     async def consume(self):
+        log.debug(f"Consuming...")
+
         try:
             job_messages = self.report_job_queue.receive_messages(
                 MessageAttributeNames=["All"],
@@ -49,45 +49,18 @@ class ThingsReportJobService:
                     start_timestamp = message_body["StartTimestamp"]
                     end_timestamp = message_body["EndTimestamp"]
 
-                    report_job_path, report_job_filename = create_csv_report_job_path(
-                        user_id, report_name, job_index, start_timestamp, end_timestamp
-                    )
-
-                    # csv_writer = await create_csv_writer(
-                    #     report_job_path, report_job_filename, user_id
-                    # )
-                    result = await create_csv_rows(user_id)
-                    log.info(f"csv rows: {result}")
-                    # self.s3_client.meta.
-
                     try:
-                        # response = s3_client.upload_file(file_name, THINGS_REPORT_JOB_BUCKET_NAME, object_name)
-                        #
-                        # log.info(f"S£ RESPONSE {response}")
-
-                        # with open("FILE_NAME", "rb") as f:
-                        #     s3.upload_fileobj(f, "BUCKET_NAME", "OBJECT_NAME")
-
-                        # response = self.s3_client.put_object(
-                        #     Bucket="ct-iot-thing-report-jobs",  # THINGS_REPORT_JOB_BUCKET_NAME,
-                        #     Body=json.dumps(result),
-                        #     Key=f"{report_job_path}/{report_job_filename}",
-                        # )
-
-                        response = s3_upload_report_job(
-                            self.s3_client,
-                            result,
-                            f"{report_job_path}/{report_job_filename}",
+                        await self.upload_csv_job(
+                            user_id,
+                            report_name,
+                            job_index,
+                            start_timestamp,
+                            end_timestamp,
                         )
-
-                        log.info(f"S3 RESPONSE {response}")
-
                     except ClientError as err:
                         log.error(f"s3 client error: {err}")
                     finally:
                         job_message.delete()
-
-                    # csv_writer.writerows(result)
 
                     # job_path_prefix = (
                     #     f"{message_body["UserId"]}/{message_body["ReportName"]}"
@@ -104,6 +77,33 @@ class ThingsReportJobService:
             log.error(f"Couldn't receive report_job_queue messages error {error}")
 
             raise error
+
+    async def upload_csv_job(
+        self, user_id, report_name, job_index, start_timestamp, end_timestamp
+    ):
+        (
+            report_job_file_path,
+            report_job_upload_path,
+            report_job_filename,
+        ) = create_csv_report_job_path(
+            user_id,
+            report_name,
+            job_index,
+            start_timestamp,
+            end_timestamp,
+        )
+
+        result = await create_csv_rows(user_id)
+
+        create_csv_writer(report_job_file_path, report_job_filename, result)
+
+        return s3_upload_csv(
+            self.s3_client,
+            f"{report_job_file_path}/{report_job_filename}",
+            f"{report_job_upload_path}/{report_job_filename}",
+        )
+
+        # log.info(f"S3 RESPONSE {response}")
 
     def produce(self, archive_job_messages: Any) -> Any:
         try:
