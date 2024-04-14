@@ -84,7 +84,6 @@ def create_job_message(
 
 def create_job_messages(total: int, offset=0):
     messages = []
-    device_id = "esp-abcdef123456"
     year_delta = 10
 
     for counter in range(total):

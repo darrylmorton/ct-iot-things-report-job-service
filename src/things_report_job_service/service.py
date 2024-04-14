@@ -32,14 +32,12 @@ class ThingsReportJobService:
         )
 
     async def poll(self):
-        log.info(f"Polling...")
+        log.debug(f"Polling...")
 
         while True:
             await self.consume()
 
     async def consume(self):
-        log.info(f"JOB Consuming...")
-
         try:
             job_messages = self.report_job_queue.receive_messages(
                 MessageAttributeNames=["All"],
@@ -58,8 +56,6 @@ class ThingsReportJobService:
                     end_timestamp = message_body["EndTimestamp"]
                     archive_report = message_body["ArchiveReport"]
 
-                    log.info(f"*** ARCHIVE REPORT: {archive_report}")
-
                     (
                         report_job_file_path,
                         report_job_upload_path,
@@ -69,8 +65,6 @@ class ThingsReportJobService:
                     )
 
                     if archive_report == "False":
-                        log.info(f"*** ONLY NON ARCHIVE MESSAGES...")
-
                         try:
                             await self.upload_csv_job(
                                 user_id,
@@ -81,9 +75,8 @@ class ThingsReportJobService:
                             )
                         except ClientError as err:
                             log.error(f"s3 client error: {err}")
-                    else:
-                        log.info(f"*** ARCHIVE MESSAGE...")
 
+                    else:
                         message_id = str(uuid.uuid4())
 
                         archive_message = create_archive_job_message(
@@ -106,16 +99,14 @@ class ThingsReportJobService:
     async def upload_csv_job(
         self, user_id, report_name, job_index, start_timestamp, end_timestamp
     ):
-        (
-            report_job_file_path,
-            report_job_upload_path,
-            report_job_filename,
-        ) = create_csv_report_job_path(
-            user_id,
-            report_name,
-            job_index,
-            start_timestamp,
-            end_timestamp,
+        report_job_file_path, report_job_upload_path, report_job_filename = (
+            create_csv_report_job_path(
+                user_id,
+                report_name,
+                job_index,
+                start_timestamp,
+                end_timestamp,
+            )
         )
 
         result = await create_csv_rows(user_id)
@@ -129,14 +120,10 @@ class ThingsReportJobService:
         )
 
     async def produce(self, archive_job_messages: Any) -> Any:
-        log.info(f"*** PRODUCE...")
+        log.debug("Produce archive job message")
 
         try:
             if len(archive_job_messages) > 0:
-                log.info(
-                    f"*** PRODUCE TRUTHY archive_job_messages {archive_job_messages}"
-                )
-
                 self.report_archive_job_queue.send_messages(
                     Entries=archive_job_messages
                 )

@@ -39,6 +39,8 @@ def expected_archive_job_message(message: Any):
 
 
 async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
+    log.debug("Polling...")
+
     timeout = time.time() + timeout_seconds
 
     while True:
@@ -52,14 +54,10 @@ async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
 async def report_archive_job_consumer(
     report_archive_job_queue: Any, timeout_seconds=0
 ) -> Any:
-    log.info(f"Starting report archive job consumer...")
-
     timeout = time.time() + timeout_seconds
     messages = []
 
     while True:
-        log.info(f"Archive job consuming...")
-
         if time.time() > timeout:
             log.info(f"Task timed out after {timeout_seconds}")
             break
@@ -69,8 +67,6 @@ async def report_archive_job_consumer(
             MaxNumberOfMessages=10,
             WaitTimeSeconds=5,
         )
-        log.info(f"**** Archive job messages {archive_job_messages}")
-        log.info(f"**** Archive job messages ARRAY LENGTH {len(archive_job_messages)}")
 
         for archive_job_message in archive_job_messages:
             messages.append(archive_job_message)
@@ -87,22 +83,13 @@ def assert_archive_job_message(actual_result: Any, expected_result: Any):
 
     assert actual_result["UserId"] == expected_result["UserId"]
     assert actual_result["ReportName"] == expected_result["ReportName"]
-
-    log.info(
-        f"assert_actual_archive_job_message actual_result {actual_result["JobPath"]}"
-    )
-    log.info(
-        f"assert_actual_archive_job_message expected_result {expected_result["JobPath"]}"
-    )
-
     assert actual_result["JobPath"] == expected_result["JobPath"]
     assert actual_result["JobUploadPath"] == expected_result["JobUploadPath"]
 
 
 def assert_archive_job_messages(actual_result: Any, expected_result: Any):
-    # log.info(f"json.loads(actual_result): {json.loads(actual_result)}")
-
     assert len(actual_result) == len(expected_result)
+
     index = 0
 
     for archive_message in actual_result:
