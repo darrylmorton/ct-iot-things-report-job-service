@@ -1,11 +1,17 @@
 import json
 import logging
+import uuid
 from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
 
-from ..config import THINGS_REPORT_JOB_QUEUE, AWS_REGION, THINGS_REPORT_ARCHIVE_JOB_QUEUE
+from util.service_util import create_archive_job_message
+from ..config import (
+    THINGS_REPORT_JOB_QUEUE,
+    AWS_REGION,
+    THINGS_REPORT_ARCHIVE_JOB_QUEUE,
+)
 from ..util.s3_util import (
     create_csv_writer,
     create_csv_rows,
@@ -21,16 +27,18 @@ class ThingsReportJobService:
         self.sqs = boto3.resource("sqs", region_name=AWS_REGION)
         self.s3_client = boto3.client("s3", region_name=AWS_REGION)
         self.report_job_queue = self.sqs.Queue(f"{THINGS_REPORT_JOB_QUEUE}.fifo")
-        # self.report_archive_job_queue = self.sqs.Queue(f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo")
+        self.report_archive_job_queue = self.sqs.Queue(
+            f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo"
+        )
 
     async def poll(self):
-        log.debug(f"Polling...")
+        log.info(f"Polling...")
 
         while True:
             await self.consume()
 
     async def consume(self):
-        log.debug(f"Consuming...")
+        log.info(f"JOB Consuming...")
 
         try:
             job_messages = self.report_job_queue.receive_messages(
@@ -48,30 +56,47 @@ class ThingsReportJobService:
                     job_index = message_body["JobIndex"]
                     start_timestamp = message_body["StartTimestamp"]
                     end_timestamp = message_body["EndTimestamp"]
+                    archive_report = message_body["ArchiveReport"]
 
-                    try:
-                        await self.upload_csv_job(
+                    log.info(f"*** ARCHIVE REPORT: {archive_report}")
+
+                    (
+                        report_job_file_path,
+                        report_job_upload_path,
+                        report_job_filename,
+                    ) = create_csv_report_job_path(
+                        user_id, report_name, job_index, start_timestamp, end_timestamp
+                    )
+
+                    if archive_report == "False":
+                        log.info(f"*** ONLY NON ARCHIVE MESSAGES...")
+
+                        try:
+                            await self.upload_csv_job(
+                                user_id,
+                                report_name,
+                                job_index,
+                                start_timestamp,
+                                end_timestamp,
+                            )
+                        except ClientError as err:
+                            log.error(f"s3 client error: {err}")
+                    else:
+                        log.info(f"*** ARCHIVE MESSAGE...")
+
+                        message_id = str(uuid.uuid4())
+
+                        archive_message = create_archive_job_message(
+                            message_id,
                             user_id,
                             report_name,
-                            job_index,
-                            start_timestamp,
-                            end_timestamp,
+                            job_path=report_job_file_path,
+                            job_upload_path=report_job_upload_path,
                         )
-                    except ClientError as err:
-                        log.error(f"s3 client error: {err}")
-                    finally:
-                        job_message.delete()
 
-                    # job_path_prefix = (
-                    #     f"{message_body["UserId"]}/{message_body["ReportName"]}"
-                    # )
-                    # job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
-                    # job_path_prefix = (
-                    #     f"{message_body["UserId"]}/{message_body["ReportName"]}"
-                    # )
-                    # job_path_suffix = f"{message_body["StartTimestamp"]}-{message_body["EndTimestamp"]}"
+                        await self.produce([archive_message])
 
-                    # self.produce(archive_message)
+                    job_message.delete()
 
         except ClientError as error:
             log.error(f"Couldn't receive report_job_queue messages error {error}")
@@ -97,17 +122,21 @@ class ThingsReportJobService:
 
         create_csv_writer(report_job_file_path, report_job_filename, result)
 
-        return s3_upload_csv(
+        s3_upload_csv(
             self.s3_client,
             f"{report_job_file_path}/{report_job_filename}",
             f"{report_job_upload_path}/{report_job_filename}",
         )
 
-        # log.info(f"S3 RESPONSE {response}")
+    async def produce(self, archive_job_messages: Any) -> Any:
+        log.info(f"*** PRODUCE...")
 
-    def produce(self, archive_job_messages: Any) -> Any:
         try:
             if len(archive_job_messages) > 0:
+                log.info(
+                    f"*** PRODUCE TRUTHY archive_job_messages {archive_job_messages}"
+                )
+
                 self.report_archive_job_queue.send_messages(
                     Entries=archive_job_messages
                 )

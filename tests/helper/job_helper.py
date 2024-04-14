@@ -102,16 +102,7 @@ def create_job_messages(total: int, offset=0):
 
         message_id = str(uuid.uuid4())
         user_id = str(uuid.uuid4())
-        archive_report = index > date_range_days - 1
-
-        log.info(f"{start_timestamp}")
-        log.info(f"{end_timestamp}")
-
-        log.info(f"{date_range_days}")
-        log.info(f"{archive_report}")
-
-        log.info(f"{message_id}")
-        log.info(f"{user_id}")
+        archive_report = index == total - 1
 
         job_message = create_job_message(
             message_id,

@@ -10,17 +10,17 @@ from ..crud import find_thing_payloads
 log = logging.getLogger("things_report_job_service")
 
 
+def isodate_to_timestamp(timestamp: str):
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+
+    return datetime.datetime.strptime(timestamp, datetime_format).timestamp()
+
+
 def create_csv_report_job_path(
     user_id: str, report_name: str, job_index, start_timestamp: str, end_timestamp: str
 ) -> tuple[str, str, str]:
-    datetime_format = "%Y-%m-%d %H:%M:%S"
-
-    start_timestamp = datetime.datetime.strptime(
-        start_timestamp, datetime_format
-    ).timestamp()
-    end_timestamp = datetime.datetime.strptime(
-        end_timestamp, datetime_format
-    ).timestamp()
+    start_timestamp = isodate_to_timestamp(start_timestamp)
+    end_timestamp = isodate_to_timestamp(end_timestamp)
 
     report_job_file_path = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{int(start_timestamp)}-{int(end_timestamp)}"
     report_job_upload_path = (

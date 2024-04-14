@@ -24,6 +24,7 @@ classDiagram
         +String: UserId
         +String: ReportName
         +String: JobPath
+        +String: JobUploadPath
     }
     
     note for ReportArchiveJobMessage "Report Archive Job Queue

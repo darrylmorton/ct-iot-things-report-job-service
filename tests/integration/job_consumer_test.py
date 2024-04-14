@@ -5,10 +5,17 @@ import boto3
 import pytest
 import uuid
 
+from ..helper.archive_job_helper import (
+    expected_archive_job_message,
+    report_archive_job_consumer,
+    assert_archive_job_messages,
+)
+from ..helper.helper import create_sqs_queue
 from src.config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
+    THINGS_REPORT_ARCHIVE_JOB_QUEUE,
 )
 from src.things_report_job_service.service import ThingsReportJobService
 from src.util.s3_util import (
@@ -17,7 +24,6 @@ from src.util.s3_util import (
     s3_upload_csv,
 )
 
-from ..helper.helper import create_sqs_queue
 from ..helper.job_helper import (
     service_poll,
     create_job_messages,
@@ -38,7 +44,6 @@ class TestRequestService:
     job_upload_path = f"{user_id}/{report_name}-1712876400-1712962799"
     job_path_suffix = f"{report_name}-{0}.csv"
 
-    @pytest.mark.skip
     def test_csv_report_job_path(self):
         expected_result_file_path = self.job_file_path_prefix
         expected_result_upload_path = self.job_upload_path
@@ -58,28 +63,41 @@ class TestRequestService:
         assert actual_upload_path == expected_result_upload_path
         assert actual_result_filename == expected_result_filename
 
+    # uploading disabled
     @patch(
         "src.things_report_job_service.service.ThingsReportJobService.upload_csv_job"
     )
-    @pytest.mark.skip
     async def test_job_consumer(self, mock_upload_csv_job, sqs_client):
         mock_upload_csv_job.return_value = None
 
         job_service = ThingsReportJobService()
         report_job_queue = create_sqs_queue(THINGS_REPORT_JOB_QUEUE)
-        # report_archive_job_queue = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
+        report_archive_job_queue = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
 
-        message_batch_one = create_job_messages(1)
-        # expected_archive_job_message_batch_one = expected_archive_job_message(message_batch_one[0])
-        # log.info(f"message_batch_one {message_batch_one}")
+        message_batch_one = create_job_messages(3)
+        expected_archive_job_message_batch_one = expected_archive_job_message(
+            message_batch_one[2]
+        )
+        log.info(f"message_batch_one {message_batch_one}")
+        log.info(
+            f"expected_archive_job_message_batch_one {expected_archive_job_message_batch_one}"
+        )
 
         report_job_queue.send_messages(Entries=message_batch_one)
-        await service_poll(job_service, 30)
+        await service_poll(job_service, 10)
 
-        # actual_archive_job_messages_batch_one = report_archive_job_consumer(report_archive_job_queue, 20)
-        # assert_archive_job_messages(actual_archive_job_messages_batch_one, expected_archive_job_message_batch_one)
+        actual_archive_job_messages_batch_one = await report_archive_job_consumer(
+            report_archive_job_queue, 10
+        )
+        log.info(
+            f"actual_archive_job_messages_batch_one {actual_archive_job_messages_batch_one}"
+        )
 
-    #
+        assert_archive_job_messages(
+            actual_archive_job_messages_batch_one,
+            expected_archive_job_message_batch_one,
+        )
+
     @pytest.mark.skip(reason="requires real aws credentials")
     def test_s3_report_job(self):
         actual_result_file_path, actual_result_upload_path, actual_result_filename = (
