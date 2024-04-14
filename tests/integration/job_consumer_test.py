@@ -78,19 +78,12 @@ class TestRequestService:
         expected_archive_job_message_batch_one = expected_archive_job_message(
             message_batch_one[2]
         )
-        log.info(f"message_batch_one {message_batch_one}")
-        log.info(
-            f"expected_archive_job_message_batch_one {expected_archive_job_message_batch_one}"
-        )
 
         report_job_queue.send_messages(Entries=message_batch_one)
         await service_poll(job_service, 10)
 
         actual_archive_job_messages_batch_one = await report_archive_job_consumer(
             report_archive_job_queue, 10
-        )
-        log.info(
-            f"actual_archive_job_messages_batch_one {actual_archive_job_messages_batch_one}"
         )
 
         assert_archive_job_messages(
