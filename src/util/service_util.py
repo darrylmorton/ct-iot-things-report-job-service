@@ -1,16 +1,32 @@
 import datetime
 import json
 import logging
+from typing import Tuple
 
 log = logging.getLogger("things_report_job_service")
 
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def create_report_timestamp(iso_date: str) -> datetime:
-    return datetime.datetime.strptime(iso_date, "%Y-%m-%d %H:%M:%S")
+
+def create_report_timestamp(timestamp: str) -> datetime:
+    return datetime.datetime.strptime(timestamp, DATE_FORMAT)
 
 
 def get_date_range_days(start: datetime, end: datetime) -> int:
     return int((end - start).days)
+
+
+def create_epoch_timestamp(timestamp: str) -> int:
+    return int(datetime.datetime.strptime(timestamp, DATE_FORMAT).timestamp())
+
+
+def create_default_epoch_timestamps() -> Tuple[int, int]:
+    today = datetime.datetime.today()
+
+    today_timestamp = int(today.timestamp())
+    yesterday_timestamp = int((today - datetime.timedelta(days=1)).timestamp())
+
+    return today_timestamp, yesterday_timestamp
 
 
 def create_archive_job_message(

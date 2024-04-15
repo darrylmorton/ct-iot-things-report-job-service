@@ -16,6 +16,18 @@ server-start: fmt
 	poetry run uvicorn src.things_report_job_service.service:server --port 8001 &
 .PHONY:server-start
 
+test-unit: fmt
+	poetry run pytest tests/unit
+.PHONY:test-unit
+
+test-integration: fmt
+	poetry run pytest tests/integration
+.PHONY:test-integration
+
+test: fmt
+	poetry run pytest tests
+.PHONY:test
+
 test-integration: fmt
 	poetry run pytest tests/integration
 .PHONY:test-integration

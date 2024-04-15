@@ -6,7 +6,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-from util.service_util import create_archive_job_message
+from ..util.service_util import create_archive_job_message
 from ..config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
@@ -73,8 +73,10 @@ class ThingsReportJobService:
                                 start_timestamp,
                                 end_timestamp,
                             )
-                        except ClientError as err:
-                            log.error(f"s3 client error: {err}")
+                        except ClientError as error:
+                            log.error(f"S3 client upload error: {error}")
+
+                            raise error
 
                     else:
                         message_id = str(uuid.uuid4())

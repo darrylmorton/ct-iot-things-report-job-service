@@ -4,8 +4,9 @@ import logging
 import os
 from typing import Any
 
+from .service_util import create_default_epoch_timestamps, create_epoch_timestamp
 from ..config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
-from ..crud import find_thing_payloads
+from ..crud import find_thing_payloads_by_timestamps
 
 log = logging.getLogger("things_report_job_service")
 
@@ -56,8 +57,16 @@ def create_csv_row(user_id: str, thing_payload: Any) -> Any:
     }
 
 
-async def create_csv_rows(user_id: str):
-    thing_payloads_result = await find_thing_payloads()
+async def create_csv_rows(user_id: str, start_timestamp: str, end_timestamp: str):
+    if not start_timestamp or not end_timestamp:
+        start_timestamp, end_timestamp = create_default_epoch_timestamps()
+    else:
+        start_timestamp = create_epoch_timestamp(start_timestamp)
+        end_timestamp = create_epoch_timestamp(end_timestamp)
+
+    thing_payloads_result = await find_thing_payloads_by_timestamps(
+        start_timestamp, end_timestamp
+    )
 
     csv_rows = []
 

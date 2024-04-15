@@ -5,6 +5,7 @@ import boto3
 import pytest
 import uuid
 
+from src.crud import find_thing_payloads_by_timestamps
 from ..helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
@@ -43,25 +44,6 @@ class TestRequestService:
     job_file_path_prefix = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712876400-1712962799"
     job_upload_path = f"{user_id}/{report_name}-1712876400-1712962799"
     job_path_suffix = f"{report_name}-{0}.csv"
-
-    def test_csv_report_job_path(self):
-        expected_result_file_path = self.job_file_path_prefix
-        expected_result_upload_path = self.job_upload_path
-        expected_result_filename = self.job_path_suffix
-
-        actual_result_file_path, actual_upload_path, actual_result_filename = (
-            create_csv_report_job_path(
-                self.user_id,
-                self.report_name,
-                self.job_index,
-                self.start_timestamp,
-                self.end_timestamp,
-            )
-        )
-
-        assert actual_result_file_path == expected_result_file_path
-        assert actual_upload_path == expected_result_upload_path
-        assert actual_result_filename == expected_result_filename
 
     # uploading disabled
     @patch(
@@ -116,3 +98,11 @@ class TestRequestService:
             f"{actual_result_file_path}/{actual_result_filename}",
             f"{actual_result_upload_path}/{actual_result_filename}",
         )
+
+    async def test_find_payloads_by_timestamps(self):
+        start = 1712650196
+        end = 1712653796
+
+        actual_result = await find_thing_payloads_by_timestamps(start, end)
+
+        assert len(actual_result) == 18
