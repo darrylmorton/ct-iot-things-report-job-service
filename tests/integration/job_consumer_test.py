@@ -22,7 +22,7 @@ from src.config import (
 from src.things_report_job_service.service import ThingsReportJobService
 from src.util.s3_util import (
     create_csv_report_job_path,
-    create_csv_writer,
+    write_data_to_csv,
     s3_upload_csv,
 )
 
@@ -88,7 +88,7 @@ class TestJobService:
 
         csv_data_rows = create_csv_rows_data()
 
-        create_csv_writer(
+        write_data_to_csv(
             self.job_file_path_prefix, self.job_path_suffix, csv_data_rows
         )
 

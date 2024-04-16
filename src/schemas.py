@@ -43,27 +43,6 @@ class ThingPayload(BaseModel):
         from_attributes = True
 
 
-class MessageAttribute(BaseModel):
-    DataType: str
-    StringValue: str
-
-
-class JobArchiveMessageAttribute(BaseModel):
-    Id: MessageAttribute
-    UserId: MessageAttribute
-    ReportName: MessageAttribute
-    JobPath: MessageAttribute
-    JobUploadPath: MessageAttribute
-
-
-class JobArchiveMessageBody(BaseModel):
-    Id: str
-    UserId: str
-    ReportName: str
-    JobPath: str
-    JobUploadPath: str
-
-
 class CSVRow(BaseModel):
     user_id: str
     device_id: str

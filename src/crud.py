@@ -13,8 +13,6 @@ async def find_thing_payloads_by_timestamps(
             stmt = (
                 select(ThingPayloadModel)
                 .filter(
-                    # ThingPayloadModel.payload_timestamp >= start_timestamp
-                    # and ThingPayloadModel.payload_timestamp <= end_timestamp
                     ThingPayloadModel.payload_timestamp.between(
                         start_timestamp, end_timestamp
                     )

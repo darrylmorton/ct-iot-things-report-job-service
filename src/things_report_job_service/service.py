@@ -13,7 +13,7 @@ from ..config import (
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
 )
 from ..util.s3_util import (
-    create_csv_writer,
+    write_data_to_csv,
     create_csv_rows,
     create_csv_report_job_path,
     s3_upload_csv,
@@ -110,7 +110,7 @@ class ThingsReportJobService:
                 user_id, start_timestamp, end_timestamp
             )
 
-            create_csv_writer(report_job_file_path, report_job_filename, result)
+            write_data_to_csv(report_job_file_path, report_job_filename, result)
 
             s3_upload_csv(
                 self.s3_client,

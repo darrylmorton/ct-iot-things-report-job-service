@@ -4,17 +4,19 @@ import logging
 import os
 
 from ..schemas import ThingPayload, CSVRow
-from .service_util import create_default_epoch_timestamps, create_epoch_timestamp
+from .service_util import (
+    create_default_epoch_timestamps,
+    create_epoch_timestamp,
+    DATE_FORMAT,
+)
 from ..config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from ..crud import find_thing_payloads_by_timestamps
 
 log = logging.getLogger("things_report_job_service")
 
 
-def isodate_to_timestamp(timestamp: str):
-    datetime_format = "%Y-%m-%d %H:%M:%S"
-
-    return datetime.datetime.strptime(timestamp, datetime_format).timestamp()
+def isodate_to_timestamp(timestamp: str) -> datetime:
+    return datetime.datetime.strptime(timestamp, DATE_FORMAT).timestamp()
 
 
 def create_csv_report_job_path(
@@ -78,7 +80,7 @@ async def create_csv_rows(
     return csv_rows
 
 
-def create_csv_writer(
+def write_data_to_csv(
     report_job_path: str,
     report_job_filename: str,
     csv_data_rows: list,
