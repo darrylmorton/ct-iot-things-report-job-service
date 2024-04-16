@@ -5,13 +5,14 @@ import time
 import uuid
 from typing import Any
 
+from schemas import CSVRow
 from src.things_report_job_service.service import ThingsReportJobService
 from src.util.service_util import get_date_range_days, isodate_to_timestamp
 
 log = logging.getLogger("test_things_report_job_service")
 
 
-async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
+async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0) -> None:
     timeout = time.time() + timeout_seconds
 
     while True:
@@ -31,7 +32,7 @@ def create_job_message(
     job_index: str,
     total_jobs: str,
     archive_report: str,
-):
+) -> dict:
     return {
         "Id": message_id,
         "MessageAttributes": {
@@ -82,7 +83,7 @@ def create_job_message(
     }
 
 
-def create_job_messages(total: int, offset=0):
+def create_job_messages(total: int, offset=0) -> list[dict]:
     messages = []
     year_delta = 10
 
@@ -120,7 +121,7 @@ def create_job_messages(total: int, offset=0):
     return messages
 
 
-def expected_job_messages(messages: Any):
+def expected_job_messages(messages: Any) -> list[dict]:
     job_messages = []
 
     for message in messages:
@@ -165,7 +166,7 @@ def expected_job_messages(messages: Any):
     return job_messages
 
 
-def assert_job_messages(actual_result: Any, expected_result: Any):
+def assert_job_messages(actual_result: Any, expected_result: Any) -> None:
     assert len(actual_result) == len(expected_result)
     index = 0
 
@@ -174,7 +175,7 @@ def assert_job_messages(actual_result: Any, expected_result: Any):
         index = index + 1
 
 
-def create_csv_rows_data():
+def create_csv_rows_data() -> list[CSVRow]:
     return [
         {
             "user_id": "d4b33dab-e3bd-4c6c-baf3-5a5d72a8df96",

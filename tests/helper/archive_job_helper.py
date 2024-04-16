@@ -13,7 +13,7 @@ from src.util.service_util import create_archive_job_message
 log = logging.getLogger("test_things_report_job_service")
 
 
-def expected_archive_job_message(message: Any):
+def expected_archive_job_message(message: dict) -> list[dict]:
     message_body = json.loads(message["MessageBody"])
 
     start_timestamp = isodate_to_timestamp(message_body["StartTimestamp"])
@@ -38,7 +38,7 @@ def expected_archive_job_message(message: Any):
     ]
 
 
-async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
+async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0) -> None:
     log.debug("Polling...")
 
     timeout = time.time() + timeout_seconds
@@ -53,7 +53,7 @@ async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0):
 
 async def report_archive_job_consumer(
     report_archive_job_queue: Any, timeout_seconds=0
-) -> Any:
+) -> list[dict]:
     timeout = time.time() + timeout_seconds
     messages = []
 
@@ -76,7 +76,7 @@ async def report_archive_job_consumer(
     return messages
 
 
-def assert_archive_job_message(actual_result: Any, expected_result: Any):
+def assert_archive_job_message(actual_result: dict, expected_result: dict) -> None:
     assert validate_uuid4(actual_result["Id"])
     assert validate_uuid4(expected_result["Id"])
     assert actual_result["Id"] != expected_result["Id"]
@@ -87,7 +87,9 @@ def assert_archive_job_message(actual_result: Any, expected_result: Any):
     assert actual_result["JobUploadPath"] == expected_result["JobUploadPath"]
 
 
-def assert_archive_job_messages(actual_result: Any, expected_result: Any):
+def assert_archive_job_messages(
+    actual_result: list[dict], expected_result: list[dict]
+) -> None:
     assert len(actual_result) == len(expected_result)
 
     index = 0
