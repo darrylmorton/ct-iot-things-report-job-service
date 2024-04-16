@@ -18,10 +18,10 @@ def create_csv_report_job_path(
 ) -> tuple[str, str, str]:
     start_timestamp = isodate_to_timestamp(start_timestamp)
     end_timestamp = isodate_to_timestamp(end_timestamp)
-
-    report_job_file_path = f"""
-        {THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_timestamp}-{end_timestamp}
-    """
+    # fmt: off
+    report_job_file_path = (
+        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_timestamp}-{end_timestamp}"
+    )
     report_job_upload_path = (
         f"{user_id}/{report_name}-{start_timestamp}-{end_timestamp}"
     )

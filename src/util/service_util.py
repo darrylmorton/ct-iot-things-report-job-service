@@ -17,7 +17,7 @@ def get_date_range_days(start: datetime, end: datetime) -> int:
 
 
 def create_default_epoch_timestamps() -> Tuple[int, int]:
-    today = datetime.datetime.today()
+    today = datetime.datetime.now(tz=datetime.timezone.utc)
 
     today_timestamp = int(today.timestamp())
     yesterday_timestamp = int((today - datetime.timedelta(days=1)).timestamp())
