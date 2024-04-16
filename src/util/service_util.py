@@ -35,10 +35,10 @@ def create_archive_job_message(
     report_name: str,
     job_path: str,
     job_upload_path: str,
-):
-    return {
-        "Id": message_id,
-        "MessageAttributes": {
+) -> dict:
+    return dict(
+        Id=message_id,
+        MessageAttributes={
             "Id": {
                 "DataType": "String",
                 "StringValue": message_id,
@@ -60,12 +60,12 @@ def create_archive_job_message(
                 "StringValue": job_upload_path,
             },
         },
-        "MessageBody": json.dumps({
+        MessageBody=json.dumps({
             "Id": message_id,
             "UserId": user_id,
             "ReportName": report_name,
             "JobPath": job_path,
             "JobUploadPath": job_upload_path,
         }),
-        "MessageDeduplicationId": message_id,
-    }
+        MessageDeduplicationId=message_id,
+    )

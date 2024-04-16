@@ -2,8 +2,8 @@ import csv
 import datetime
 import logging
 import os
-from typing import Any
 
+from ..schemas import ThingPayload, CSVRow
 from .service_util import create_default_epoch_timestamps, create_epoch_timestamp
 from ..config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from ..crud import find_thing_payloads_by_timestamps
@@ -32,7 +32,7 @@ def create_csv_report_job_path(
     return report_job_file_path, report_job_upload_path, report_job_filename
 
 
-def create_csv_row(user_id: str, thing_payload: Any) -> Any:
+def create_csv_row(user_id: str, thing_payload: ThingPayload) -> CSVRow:
     device_id = thing_payload.deviceId
     payload_timestamp = thing_payload.payload_timestamp
 
@@ -42,22 +42,24 @@ def create_csv_row(user_id: str, thing_payload: Any) -> Any:
     temperature = payload["temperature"]
     humidity = payload["humidity"]
 
-    return {
-        "user_id": user_id,
-        "device_id": device_id,
-        "payload_timestamp": payload_timestamp,
-        "cadence_unit": cadence["unit"],
-        "cadence_value": cadence["value"],
-        "temperature_unit": temperature["unit"],
-        "temperature_value": temperature["value"],
-        "humidity_unit": humidity["unit"],
-        "humidity_value": humidity["value"],
-        "battery_unit": battery["unit"],
-        "battery_value": battery["value"],
-    }
+    return CSVRow(
+        user_id=user_id,
+        device_id=device_id,
+        payload_timestamp=payload_timestamp,
+        cadence_unit=cadence["unit"],
+        cadence_value=cadence["value"],
+        temperature_unit=temperature["unit"],
+        temperature_value=temperature["value"],
+        humidity_unit=humidity["unit"],
+        humidity_value=humidity["value"],
+        battery_unit=battery["unit"],
+        battery_value=battery["value"],
+    )
 
 
-async def create_csv_rows(user_id: str, start_timestamp: str, end_timestamp: str):
+async def create_csv_rows(
+    user_id: str, start_timestamp: str, end_timestamp: str
+) -> list[CSVRow]:
     if not start_timestamp or not end_timestamp:
         start_timestamp, end_timestamp = create_default_epoch_timestamps()
     else:
@@ -68,7 +70,7 @@ async def create_csv_rows(user_id: str, start_timestamp: str, end_timestamp: str
         start_timestamp, end_timestamp
     )
 
-    csv_rows = []
+    csv_rows: list[CSVRow] = []
 
     for item in thing_payloads_result:
         csv_rows.append(create_csv_row(user_id, item))
@@ -79,8 +81,8 @@ async def create_csv_rows(user_id: str, start_timestamp: str, end_timestamp: str
 def create_csv_writer(
     report_job_path: str,
     report_job_filename: str,
-    csv_data_rows: Any,
-):
+    csv_data_rows: list,
+) -> None:
     if not os.path.exists(f"{report_job_path}"):
         os.makedirs(f"{report_job_path}")
 
@@ -105,7 +107,7 @@ def create_csv_writer(
         csv_writer.writerows(csv_data_rows)
 
 
-def s3_upload_csv(s3_client, file_path, upload_path):
+def s3_upload_csv(s3_client, file_path, upload_path) -> None:
     with open(file_path, "rb") as f:
         s3_client.upload_file(file_path, THINGS_REPORT_JOB_BUCKET_NAME, upload_path)
 

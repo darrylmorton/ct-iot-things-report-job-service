@@ -41,3 +41,38 @@ class ThingPayload(BaseModel):
 
     class ConfigDict:
         from_attributes = True
+
+
+class MessageAttribute(BaseModel):
+    DataType: str
+    StringValue: str
+
+
+class JobArchiveMessageAttribute(BaseModel):
+    Id: MessageAttribute
+    UserId: MessageAttribute
+    ReportName: MessageAttribute
+    JobPath: MessageAttribute
+    JobUploadPath: MessageAttribute
+
+
+class JobArchiveMessageBody(BaseModel):
+    Id: str
+    UserId: str
+    ReportName: str
+    JobPath: str
+    JobUploadPath: str
+
+
+class CSVRow(BaseModel):
+    user_id: str
+    device_id: str
+    payload_timestamp: int
+    cadence_unit: str
+    cadence_value: str
+    temperature_unit: str
+    temperature_value: str
+    humidity_unit: str
+    humidity_value: str
+    battery_unit: str
+    battery_value: str

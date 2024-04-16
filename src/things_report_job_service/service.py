@@ -1,11 +1,11 @@
 import json
 import logging
 import uuid
-from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
 
+from ..schemas import CSVRow
 from ..util.service_util import create_archive_job_message
 from ..config import (
     THINGS_REPORT_JOB_QUEUE,
@@ -31,13 +31,13 @@ class ThingsReportJobService:
             f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo"
         )
 
-    async def poll(self):
+    async def poll(self) -> None:
         log.debug(f"Polling...")
 
         while True:
             await self.consume()
 
-    async def consume(self):
+    async def consume(self) -> None:
         try:
             job_messages = self.report_job_queue.receive_messages(
                 MessageAttributeNames=["All"],
@@ -100,7 +100,7 @@ class ThingsReportJobService:
 
     async def upload_csv_job(
         self, user_id, report_name, job_index, start_timestamp, end_timestamp
-    ):
+    ) -> None:
         report_job_file_path, report_job_upload_path, report_job_filename = (
             create_csv_report_job_path(
                 user_id,
@@ -111,7 +111,9 @@ class ThingsReportJobService:
             )
         )
 
-        result = await create_csv_rows(user_id)
+        result: list[CSVRow] = await create_csv_rows(
+            user_id, start_timestamp, end_timestamp
+        )
 
         create_csv_writer(report_job_file_path, report_job_filename, result)
 
@@ -121,7 +123,7 @@ class ThingsReportJobService:
             f"{report_job_upload_path}/{report_job_filename}",
         )
 
-    async def produce(self, archive_job_messages: Any) -> Any:
+    async def produce(self, archive_job_messages: list[dict]) -> list[dict]:
         log.debug("Produce archive job message")
 
         try:
