@@ -3,7 +3,6 @@ import json
 import logging
 import time
 import uuid
-from typing import Any
 
 from schemas import CSVRow
 from src.things_report_job_service.service import ThingsReportJobService
@@ -33,9 +32,9 @@ def create_job_message(
     total_jobs: str,
     archive_report: str,
 ) -> dict:
-    return {
-        "Id": message_id,
-        "MessageAttributes": {
+    return dict(
+        Id=message_id,
+        MessageAttributes={
             "Id": {
                 "DataType": "String",
                 "StringValue": message_id,
@@ -69,7 +68,7 @@ def create_job_message(
                 "StringValue": archive_report,
             },
         },
-        "MessageBody": json.dumps({
+        MessageBody=json.dumps({
             "Id": message_id,
             "UserId": user_id,
             "ReportName": report_name,
@@ -79,8 +78,8 @@ def create_job_message(
             "TotalJobs": total_jobs,
             "ArchiveReport": archive_report,
         }),
-        "MessageDeduplicationId": message_id,
-    }
+        MessageDeduplicationId=message_id,
+    )
 
 
 def create_job_messages(total: int, offset=0) -> list[dict]:
@@ -121,7 +120,7 @@ def create_job_messages(total: int, offset=0) -> list[dict]:
     return messages
 
 
-def expected_job_messages(messages: Any) -> list[dict]:
+def expected_job_messages(messages: list[dict]) -> list[dict]:
     job_messages = []
 
     for message in messages:
@@ -166,7 +165,7 @@ def expected_job_messages(messages: Any) -> list[dict]:
     return job_messages
 
 
-def assert_job_messages(actual_result: Any, expected_result: Any) -> None:
+def assert_job_messages(actual_result: list[dict], expected_result: list[dict]) -> None:
     assert len(actual_result) == len(expected_result)
     index = 0
 
