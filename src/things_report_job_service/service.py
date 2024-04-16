@@ -32,7 +32,7 @@ class ThingsReportJobService:
         )
 
     async def poll(self) -> None:
-        log.debug(f"Polling...")
+        log.debug("Polling...")
 
         while True:
             await self.consume()
@@ -59,7 +59,7 @@ class ThingsReportJobService:
                     (
                         report_job_file_path,
                         report_job_upload_path,
-                        report_job_filename,
+                        _,
                     ) = create_csv_report_job_path(
                         user_id, report_name, job_index, start_timestamp, end_timestamp
                     )

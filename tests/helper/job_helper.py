@@ -106,7 +106,7 @@ def create_job_messages(total: int, offset=0) -> list[dict]:
         job_message = create_job_message(
             message_id,
             user_id,
-            report_name=f"report_name_0",
+            report_name="report_name_0",
             start_timestamp=f"{start_timestamp}",
             end_timestamp=f"{end_timestamp}",
             job_index=f"{index}",
