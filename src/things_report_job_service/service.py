@@ -64,21 +64,7 @@ class ThingsReportJobService:
                         user_id, report_name, job_index, start_timestamp, end_timestamp
                     )
 
-                    if archive_report == "False":
-                        try:
-                            await self.upload_csv_job(
-                                user_id,
-                                report_name,
-                                job_index,
-                                start_timestamp,
-                                end_timestamp,
-                            )
-                        except ClientError as error:
-                            log.error(f"S3 client upload error: {error}")
-
-                            raise error
-
-                    else:
+                    if archive_report == "True":
                         message_id = str(uuid.uuid4())
 
                         archive_message = create_archive_job_message(
@@ -90,6 +76,14 @@ class ThingsReportJobService:
                         )
 
                         await self.produce([archive_message])
+                    else:
+                        await self.upload_csv_job(
+                            user_id,
+                            report_name,
+                            job_index,
+                            start_timestamp,
+                            end_timestamp,
+                        )
 
                     job_message.delete()
 
@@ -111,20 +105,25 @@ class ThingsReportJobService:
             )
         )
 
-        result: list[CSVRow] = await create_csv_rows(
-            user_id, start_timestamp, end_timestamp
-        )
+        try:
+            result: list[CSVRow] = await create_csv_rows(
+                user_id, start_timestamp, end_timestamp
+            )
 
-        create_csv_writer(report_job_file_path, report_job_filename, result)
+            create_csv_writer(report_job_file_path, report_job_filename, result)
 
-        s3_upload_csv(
-            self.s3_client,
-            f"{report_job_file_path}/{report_job_filename}",
-            f"{report_job_upload_path}/{report_job_filename}",
-        )
+            s3_upload_csv(
+                self.s3_client,
+                f"{report_job_file_path}/{report_job_filename}",
+                f"{report_job_upload_path}/{report_job_filename}",
+            )
+        except ClientError as error:
+            log.error(f"S3 client upload error: {error}")
+
+            raise error
 
     async def produce(self, archive_job_messages: list[dict]) -> list[dict]:
-        log.debug("Produce archive job message")
+        log.debug("Send archive job message")
 
         try:
             if len(archive_job_messages) > 0:
