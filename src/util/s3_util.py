@@ -33,7 +33,7 @@ def create_csv_report_job_path(
 
 
 def create_csv_row(user_id: str, thing_payload: ThingPayload) -> CSVRow:
-    device_id = thing_payload.deviceId
+    device_id = thing_payload.device_id
     payload_timestamp = thing_payload.payload_timestamp
 
     payload = thing_payload.payload

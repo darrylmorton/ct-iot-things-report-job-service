@@ -69,10 +69,10 @@ class CSVRow(BaseModel):
     device_id: str
     payload_timestamp: int
     cadence_unit: str
-    cadence_value: str
+    cadence_value: float
     temperature_unit: str
-    temperature_value: str
+    temperature_value: float
     humidity_unit: str
-    humidity_value: str
+    humidity_value: float
     battery_unit: str
-    battery_value: str
+    battery_value: int

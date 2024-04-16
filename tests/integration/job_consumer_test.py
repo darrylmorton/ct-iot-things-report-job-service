@@ -5,6 +5,7 @@ import boto3
 import pytest
 import uuid
 
+from ..helper.db_helper import assert_thing_payloads, create_thing_payloads_data
 from src.crud import find_thing_payloads_by_timestamps
 from ..helper.archive_job_helper import (
     expected_archive_job_message,
@@ -35,7 +36,7 @@ log = logging.getLogger("test_things_report_job_service")
 
 
 @pytest.mark.asyncio
-class TestRequestService:
+class TestJobService:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
     job_index = 0
@@ -103,6 +104,8 @@ class TestRequestService:
         start = 1712650196
         end = 1712653796
 
+        expected_result = create_thing_payloads_data()
+
         actual_result = await find_thing_payloads_by_timestamps(start, end)
 
-        assert len(actual_result) == 18
+        assert_thing_payloads(actual_result, expected_result)
