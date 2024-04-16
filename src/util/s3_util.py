@@ -3,20 +3,17 @@ import datetime
 import logging
 import os
 
+from dateutil.parser import isoparse
+
 from ..schemas import ThingPayload, CSVRow
 from .service_util import (
     create_default_epoch_timestamps,
-    create_epoch_timestamp,
-    DATE_FORMAT,
+    isodate_to_timestamp,
 )
 from ..config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from ..crud import find_thing_payloads_by_timestamps
 
 log = logging.getLogger("things_report_job_service")
-
-
-def isodate_to_timestamp(timestamp: str) -> datetime:
-    return datetime.datetime.strptime(timestamp, DATE_FORMAT).timestamp()
 
 
 def create_csv_report_job_path(
@@ -25,9 +22,9 @@ def create_csv_report_job_path(
     start_timestamp = isodate_to_timestamp(start_timestamp)
     end_timestamp = isodate_to_timestamp(end_timestamp)
 
-    report_job_file_path = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{int(start_timestamp)}-{int(end_timestamp)}"
+    report_job_file_path = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_timestamp}-{end_timestamp}"
     report_job_upload_path = (
-        f"{user_id}/{report_name}-{int(start_timestamp)}-{int(end_timestamp)}"
+        f"{user_id}/{report_name}-{start_timestamp}-{end_timestamp}"
     )
     report_job_filename = f"{report_name}-{job_index}.csv"
 
@@ -65,8 +62,8 @@ async def create_csv_rows(
     if not start_timestamp or not end_timestamp:
         start_timestamp, end_timestamp = create_default_epoch_timestamps()
     else:
-        start_timestamp = create_epoch_timestamp(start_timestamp)
-        end_timestamp = create_epoch_timestamp(end_timestamp)
+        start_timestamp = isodate_to_timestamp(start_timestamp)
+        end_timestamp = isodate_to_timestamp(end_timestamp)
 
     thing_payloads_result = await find_thing_payloads_by_timestamps(
         start_timestamp, end_timestamp

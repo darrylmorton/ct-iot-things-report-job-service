@@ -40,10 +40,11 @@ class TestJobService:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
     job_index = 0
-    start_timestamp = "2024-04-12 00:00:00"
-    end_timestamp = "2024-04-12 23:59:59"
-    job_file_path_prefix = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712876400-1712962799"
-    job_upload_path = f"{user_id}/{report_name}-1712876400-1712962799"
+    start_timestamp = "2024-04-12T00:00:00Z"
+    end_timestamp = "2024-04-12T23:59:59Z"
+    job_file_path_prefix = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712880000-1712966399"
+    job_upload_path = f"{user_id}/{report_name}-1712880000-1712966399"
+    start_epoch_timestamp = 1712880000
     job_path_suffix = f"{report_name}-{0}.csv"
 
     # uploading disabled

@@ -6,7 +6,7 @@ import uuid
 from typing import Any
 
 from src.things_report_job_service.service import ThingsReportJobService
-from src.util.service_util import create_report_timestamp, get_date_range_days
+from src.util.service_util import get_date_range_days, isodate_to_timestamp
 
 log = logging.getLogger("test_things_report_job_service")
 
@@ -89,13 +89,13 @@ def create_job_messages(total: int, offset=0):
     for counter in range(total):
         index = counter + offset
 
-        start_timestamp_isoformat = f"20{year_delta}-01-01 00:00:00"
-        start_timestamp = create_report_timestamp(start_timestamp_isoformat)
+        start_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00Z"
+        start_timestamp = datetime.datetime.fromisoformat(start_timestamp_isoformat)
 
         year_delta = year_delta + 1
-        end_timestamp_isoformat = f"20{year_delta}-01-01 00:00:00"
+        end_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00Z"
 
-        end_timestamp = create_report_timestamp(end_timestamp_isoformat)
+        end_timestamp = datetime.datetime.fromisoformat(end_timestamp_isoformat)
 
         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
 
@@ -127,20 +127,24 @@ def expected_job_messages(messages: Any):
         message_body = json.loads(message["MessageBody"])
 
         start_timestamp_iso = message_body["StartTimestamp"]
-        start_timestamp = create_report_timestamp(start_timestamp_iso)
+        start_timestamp = isodate_to_timestamp(start_timestamp_iso)
         end_timestamp_iso = message_body["EndTimestamp"]
-        end_timestamp = create_report_timestamp(end_timestamp_iso)
+        end_timestamp = isodate_to_timestamp(end_timestamp_iso)
 
         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
         total_jobs = date_range_days + 1
 
         for index in range(total_jobs):
-            date = create_report_timestamp(start_timestamp_iso)
+            job_date = datetime.datetime.fromisoformat(start_timestamp_iso)
 
             datetime_delta = datetime.timedelta(days=index)
 
-            job_start_date = date.replace(hour=0, minute=0, second=0) + datetime_delta
-            job_end_date = date.replace(hour=23, minute=59, second=59) + datetime_delta
+            job_start_date = (
+                job_date.replace(hour=0, minute=0, second=0) + datetime_delta
+            )
+            job_end_date = (
+                job_date.replace(hour=23, minute=59, second=59) + datetime_delta
+            )
 
             message_id = uuid.uuid4()
             archive_report = index > date_range_days - 1

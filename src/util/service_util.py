@@ -3,21 +3,23 @@ import json
 import logging
 from typing import Tuple
 
+from dateutil.parser import isoparse
+
 log = logging.getLogger("things_report_job_service")
 
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+# DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%Z"
 
 
-def create_report_timestamp(timestamp: str) -> datetime:
-    return datetime.datetime.strptime(timestamp, DATE_FORMAT)
+def isodate_to_timestamp(timestamp: str) -> int:
+    return int(isoparse(timestamp).timestamp())
+
+
+# def create_report_timestamp(timestamp: str) -> datetime:
+#     return datetime.date.fromisoformat(timestamp).
 
 
 def get_date_range_days(start: datetime, end: datetime) -> int:
     return int((end - start).days)
-
-
-def create_epoch_timestamp(timestamp: str) -> int:
-    return int(datetime.datetime.strptime(timestamp, DATE_FORMAT).timestamp())
 
 
 def create_default_epoch_timestamps() -> Tuple[int, int]:

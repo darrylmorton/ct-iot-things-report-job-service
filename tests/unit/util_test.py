@@ -8,7 +8,7 @@ from src.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from src.util.s3_util import create_csv_report_job_path
 from src.util.service_util import (
     create_default_epoch_timestamps,
-    create_epoch_timestamp,
+    isodate_to_timestamp,
 )
 
 log = logging.getLogger("test_things_report_job_service")
@@ -19,11 +19,11 @@ class TestUtil:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
     job_index = 0
-    start_timestamp = "2024-04-12 00:00:00"
-    start_epoch_timestamp = 1712876400
-    end_timestamp = "2024-04-12 23:59:59"
-    job_file_path_prefix = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712876400-1712962799"
-    job_upload_path = f"{user_id}/{report_name}-1712876400-1712962799"
+    start_timestamp = "2024-04-12T00:00:00Z"
+    start_epoch_timestamp = 1712880000
+    end_timestamp = "2024-04-12T23:59:59Z"
+    job_file_path_prefix = f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712880000-1712966399"
+    job_upload_path = f"{user_id}/{report_name}-1712880000-1712966399"
     job_path_suffix = f"{report_name}-{0}.csv"
 
     def test_csv_report_job_path(self):
@@ -63,6 +63,6 @@ class TestUtil:
 
     def test_create_timestamp(self):
         expected_epoch_timestamp = self.start_epoch_timestamp
-        actual_epoch_timestamp_result = create_epoch_timestamp(self.start_timestamp)
+        actual_epoch_timestamp_result = isodate_to_timestamp(self.start_timestamp)
 
         assert actual_epoch_timestamp_result == expected_epoch_timestamp
