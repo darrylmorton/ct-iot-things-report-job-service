@@ -1,9 +1,6 @@
 import csv
-import datetime
 import logging
 import os
-
-from dateutil.parser import isoparse
 
 from ..schemas import ThingPayload, CSVRow
 from .service_util import (

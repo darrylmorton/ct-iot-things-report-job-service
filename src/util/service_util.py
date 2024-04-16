@@ -7,15 +7,9 @@ from dateutil.parser import isoparse
 
 log = logging.getLogger("things_report_job_service")
 
-# DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%Z"
-
 
 def isodate_to_timestamp(timestamp: str) -> int:
     return int(isoparse(timestamp).timestamp())
-
-
-# def create_report_timestamp(timestamp: str) -> datetime:
-#     return datetime.date.fromisoformat(timestamp).
 
 
 def get_date_range_days(start: datetime, end: datetime) -> int:
