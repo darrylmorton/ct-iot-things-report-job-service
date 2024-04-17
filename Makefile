@@ -1,5 +1,3 @@
-.DEFAULT_GOAL := build
-
 fmt:
 	poetry run ruff format .
 .PHONY:fmt
@@ -19,14 +17,6 @@ server-start: fmt
 test-unit: fmt
 	poetry run pytest tests/unit
 .PHONY:test-unit
-
-test-integration: fmt
-	poetry run pytest tests/integration
-.PHONY:test-integration
-
-test: fmt
-	poetry run pytest tests
-.PHONY:test
 
 test-integration: fmt
 	poetry run pytest tests/integration

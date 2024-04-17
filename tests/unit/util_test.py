@@ -1,7 +1,6 @@
 import logging
 import datetime
 
-import pytest
 import uuid
 
 from src.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
@@ -14,7 +13,6 @@ from src.util.service_util import (
 log = logging.getLogger("test_things_report_job_service")
 
 
-@pytest.mark.asyncio
 class TestUtil:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
