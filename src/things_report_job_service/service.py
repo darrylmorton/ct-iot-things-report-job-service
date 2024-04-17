@@ -34,6 +34,43 @@ class ThingsReportJobService:
             f"{THINGS_REPORT_ARCHIVE_JOB_QUEUE}.fifo"
         )
 
+    async def _process_messages(self, message_body: dict) -> None:
+        report_name = message_body["ReportName"]
+        user_id = message_body["UserId"]
+        job_index = message_body["JobIndex"]
+        start_timestamp = message_body["StartTimestamp"]
+        end_timestamp = message_body["EndTimestamp"]
+        archive_report = message_body["ArchiveReport"]
+
+        (
+            report_job_file_path,
+            report_job_upload_path,
+            _,
+        ) = create_csv_report_job_path(
+            user_id, report_name, job_index, start_timestamp, end_timestamp
+        )
+
+        if archive_report == "True":
+            message_id = str(uuid.uuid4())
+
+            archive_message = create_archive_job_message(
+                message_id,
+                user_id,
+                report_name,
+                job_path=report_job_file_path,
+                job_upload_path=report_job_upload_path,
+            )
+
+            await self.produce([archive_message])
+        else:
+            await self.upload_csv_job(
+                user_id,
+                report_name,
+                job_index,
+                start_timestamp,
+                end_timestamp,
+            )
+
     async def poll(self) -> None:
         log.debug("Polling...")
 
@@ -52,43 +89,9 @@ class ThingsReportJobService:
                 for job_message in job_messages:
                     message_body = json.loads(job_message.body)
 
-                    report_name = message_body["ReportName"]
-                    user_id = message_body["UserId"]
-                    job_index = message_body["JobIndex"]
-                    start_timestamp = message_body["StartTimestamp"]
-                    end_timestamp = message_body["EndTimestamp"]
-                    archive_report = message_body["ArchiveReport"]
-
-                    (
-                        report_job_file_path,
-                        report_job_upload_path,
-                        _,
-                    ) = create_csv_report_job_path(
-                        user_id, report_name, job_index, start_timestamp, end_timestamp
-                    )
-
-                    if archive_report == "True":
-                        message_id = str(uuid.uuid4())
-
-                        archive_message = create_archive_job_message(
-                            message_id,
-                            user_id,
-                            report_name,
-                            job_path=report_job_file_path,
-                            job_upload_path=report_job_upload_path,
-                        )
-
-                        await self.produce([archive_message])
-                    else:
-                        await self.upload_csv_job(
-                            user_id,
-                            report_name,
-                            job_index,
-                            start_timestamp,
-                            end_timestamp,
-                        )
-
                     job_message.delete()
+
+                    await self._process_messages(message_body)
 
         except ClientError as error:
             log.error(f"Couldn't receive report_job_queue messages error {error}")
