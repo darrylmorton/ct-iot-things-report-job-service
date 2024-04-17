@@ -113,3 +113,8 @@ class TestJobService:
         actual_result = await find_thing_payloads_by_timestamps(start, end)
 
         assert_thing_payloads(actual_result, expected_result)
+
+    @pytest.mark.skip
+    async def test_job_consumer_dql(self, sqs_client):
+        pass
+    
