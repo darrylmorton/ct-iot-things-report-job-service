@@ -1,21 +1,41 @@
 import datetime
+import json
 import logging
 import uuid
+from typing import Any
 
 import boto3
 
+from src.config import AWS_REGION
+from src.constants import WAIT_SECONDS
 
 log = logging.getLogger("test_things_report_job_service")
 
 
-def create_sqs_queue(queue_name: str):
-    sqs = boto3.resource("sqs", region_name="eu-west-2")
+def create_sqs_queue(queue_name: str, dlq_name="") -> tuple[Any, Any]:
+    sqs = boto3.resource("sqs", region_name=AWS_REGION)
+    queue_attributes = {
+        "WaitSeconds": f"{WAIT_SECONDS}",
+    }
+    dlq = None
+
+    if dlq_name:
+        dlq = sqs.create_queue(
+            QueueName=f"{dlq_name}.fifo", Attributes=queue_attributes
+        )
+
+        dlq_policy = json.dumps({
+            "deadLetterTargetArn": dlq.attributes["QueueArn"],
+            "maxReceiveCount": "10",
+        })
+
+        queue_attributes["RedrivePolicy"] = dlq_policy
 
     queue = sqs.create_queue(
-        QueueName=f"{queue_name}.fifo", Attributes={"DelaySeconds": "5"}
+        QueueName=f"{queue_name}.fifo", Attributes=queue_attributes
     )
 
-    return queue
+    return queue, dlq
 
 
 def create_timestamp(days: int = 0, before: bool = False) -> datetime:

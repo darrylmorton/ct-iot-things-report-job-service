@@ -4,6 +4,7 @@ import time
 import uuid
 from typing import Any
 
+from src.constants import WAIT_SECONDS
 from src.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from src.util.s3_util import isodate_to_timestamp
 from ..helper.helper import validate_uuid4
@@ -65,7 +66,7 @@ async def report_archive_job_consumer(
         archive_job_messages = report_archive_job_queue.receive_messages(
             MessageAttributeNames=["All"],
             MaxNumberOfMessages=10,
-            WaitTimeSeconds=5,
+            WaitTimeSeconds=WAIT_SECONDS,
         )
 
         for archive_job_message in archive_job_messages:

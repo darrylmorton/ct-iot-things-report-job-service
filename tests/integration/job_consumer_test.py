@@ -18,6 +18,7 @@ from src.config import (
     AWS_REGION,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
+    THINGS_REPORT_JOB_DLQ,
 )
 from src.things_report_job_service.service import ThingsReportJobService
 from src.util.s3_util import (
@@ -58,8 +59,10 @@ class TestJobService:
         mock_upload_csv_job.return_value = None
 
         job_service = ThingsReportJobService()
-        report_job_queue = create_sqs_queue(THINGS_REPORT_JOB_QUEUE)
-        report_archive_job_queue = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
+        report_job_queue, _ = create_sqs_queue(
+            THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_JOB_DLQ
+        )
+        report_archive_job_queue, _ = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
 
         message_batch_one = create_job_messages(3)
         expected_archive_job_message_batch_one = expected_archive_job_message(
@@ -117,4 +120,3 @@ class TestJobService:
     @pytest.mark.skip
     async def test_job_consumer_dql(self, sqs_client):
         pass
-    
