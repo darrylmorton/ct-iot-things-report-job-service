@@ -21,8 +21,7 @@ make server-start
 
 ## Test
 
-Use the `thing-service` repo to run the database container, with migrate
-and seed npm run scripts:
+Use the `thing-service` repo to run the database container, with migrate and seed npm run scripts:
 
 ```
 docker-compose up -d
