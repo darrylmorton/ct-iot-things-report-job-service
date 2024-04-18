@@ -2,8 +2,8 @@ from typing import Any
 
 import logging
 
-from src.schemas import ThingPayload
-from src.models import ThingPayloadModel
+from schemas import ThingPayload
+from models import ThingPayloadModel
 
 log = logging.getLogger("test_things_report_job_service")
 

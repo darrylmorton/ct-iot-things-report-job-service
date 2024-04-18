@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
-from .schemas import ThingPayload
-from .database import async_session
-from .models import ThingPayloadModel
+from schemas import ThingPayload
+from database import async_session
+from models import ThingPayloadModel
 
 
 async def find_thing_payloads_by_timestamps(

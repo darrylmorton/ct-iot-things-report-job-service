@@ -5,16 +5,16 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from ..constants import WAIT_SECONDS
-from ..schemas import CSVRow
-from ..util.service_util import create_archive_job_message
-from ..config import (
+from constants import WAIT_SECONDS
+from schemas import CSVRow
+from util.service_util import create_archive_job_message
+from config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
 )
-from ..util.s3_util import (
+from util.s3_util import (
     write_data_to_csv,
     create_csv_rows,
     create_csv_report_job_path,

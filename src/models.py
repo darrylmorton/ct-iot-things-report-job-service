@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, DATETIME
 from sqlalchemy.dialects.postgresql import JSON
 
-from .database import Base
+from database import Base
 
 
 class ThingPayloadModel(Base):

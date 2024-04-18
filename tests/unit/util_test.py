@@ -3,9 +3,9 @@ import datetime
 
 import uuid
 
-from src.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
-from src.util.s3_util import create_csv_report_job_path
-from src.util.service_util import (
+from config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
+from util.s3_util import create_csv_report_job_path
+from util.service_util import (
     create_default_epoch_timestamps,
     isodate_to_timestamp,
 )

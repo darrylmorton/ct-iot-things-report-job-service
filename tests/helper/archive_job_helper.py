@@ -4,12 +4,12 @@ import time
 import uuid
 from typing import Any
 
-from src.constants import WAIT_SECONDS
-from src.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
-from src.util.s3_util import isodate_to_timestamp
+from constants import WAIT_SECONDS
+from config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
+from util.s3_util import isodate_to_timestamp
 from ..helper.helper import validate_uuid4
-from src.things_report_job_service.service import ThingsReportJobService
-from src.util.service_util import create_archive_job_message
+from things_report_job_service.service import ThingsReportJobService
+from util.service_util import create_archive_job_message
 
 log = logging.getLogger("test_things_report_job_service")
 
