@@ -4,9 +4,9 @@ import logging
 import time
 import uuid
 
-from src.schemas import CSVRow
-from src.things_report_job_service.service import ThingsReportJobService
-from src.util.service_util import get_date_range_days, isodate_to_timestamp
+from schemas import CSVRow
+from things_report_job_service.service import ThingsReportJobService
+from util.service_util import get_date_range_days, isodate_to_timestamp
 
 log = logging.getLogger("test_things_report_job_service")
 

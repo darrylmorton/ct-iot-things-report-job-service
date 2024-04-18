@@ -5,16 +5,16 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from ..constants import WAIT_SECONDS
-from ..schemas import CSVRow
-from ..util.service_util import create_archive_job_message
-from ..config import (
+from constants import WAIT_SECONDS
+from schemas import CSVRow
+from util.service_util import create_archive_job_message
+from config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
 )
-from ..util.s3_util import (
+from util.s3_util import (
     write_data_to_csv,
     create_csv_rows,
     create_csv_report_job_path,
@@ -26,6 +26,8 @@ log = logging.getLogger("things_report_job_service")
 
 class ThingsReportJobService:
     def __init__(self):
+        log.debug("initializing ThingsReportJobService...")
+
         self.sqs = boto3.resource("sqs", region_name=AWS_REGION)
         self.s3_client = boto3.client("s3", region_name=AWS_REGION)
         self.report_job_queue = self.sqs.Queue(f"{THINGS_REPORT_JOB_QUEUE}.fifo")
@@ -35,6 +37,8 @@ class ThingsReportJobService:
         )
 
     async def _process_messages(self, message_body: dict) -> None:
+        log.debug("Processing job message...")
+
         report_name = message_body["ReportName"]
         user_id = message_body["UserId"]
         job_index = message_body["JobIndex"]
@@ -72,12 +76,14 @@ class ThingsReportJobService:
             )
 
     async def poll(self) -> None:
-        log.debug("Polling...")
+        log.debug("Polling for job messages...")
 
         while True:
             await self.consume()
 
     async def consume(self) -> None:
+        log.debug("Consuming job messages...")
+
         try:
             job_messages = self.report_job_queue.receive_messages(
                 MessageAttributeNames=["All"],
@@ -101,6 +107,8 @@ class ThingsReportJobService:
     async def upload_csv_job(
         self, user_id, report_name, job_index, start_timestamp, end_timestamp
     ) -> None:
+        log.debug("Uploading job csv file...")
+
         report_job_file_path, report_job_upload_path, report_job_filename = (
             create_csv_report_job_path(
                 user_id,
@@ -129,7 +137,7 @@ class ThingsReportJobService:
             raise error
 
     async def produce(self, archive_job_messages: list[dict]) -> list[dict]:
-        log.debug("Send archive job message")
+        log.debug("Sending archive job message...")
 
         try:
             if len(archive_job_messages) > 0:

@@ -6,27 +6,25 @@ import pytest
 import uuid
 
 from ..helper.db_helper import assert_thing_payloads, create_thing_payloads_data
-from src.crud import find_thing_payloads_by_timestamps
+from crud import find_thing_payloads_by_timestamps
 from ..helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
     assert_archive_job_messages,
 )
 from ..helper.helper import create_sqs_queue
-from src.config import (
+from config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
 )
-from src.things_report_job_service.service import ThingsReportJobService
-from src.util.s3_util import (
+from util.s3_util import (
     create_csv_report_job_path,
     write_data_to_csv,
     s3_upload_csv,
 )
-
 from ..helper.job_helper import (
     service_poll,
     create_job_messages,
@@ -53,12 +51,11 @@ class TestJobService:
 
     # uploading disabled
     @patch(
-        "src.things_report_job_service.service.ThingsReportJobService.upload_csv_job"
+        "things_report_job_service.service.ThingsReportJobService.upload_csv_job"
     )
-    async def test_job_consumer(self, mock_upload_csv_job, sqs_client):
+    async def test_job_consumer(self, mock_upload_csv_job, job_service):
         mock_upload_csv_job.return_value = None
 
-        job_service = ThingsReportJobService()
         report_job_queue, _ = create_sqs_queue(
             THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_JOB_DLQ
         )
@@ -118,5 +115,5 @@ class TestJobService:
         assert_thing_payloads(actual_result, expected_result)
 
     @pytest.mark.skip
-    async def test_job_consumer_dql(self, sqs_client):
+    async def test_job_consumer_dlq(self, job_service):
         pass

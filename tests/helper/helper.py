@@ -6,8 +6,8 @@ from typing import Any
 
 import boto3
 
-from src.config import AWS_REGION
-from src.constants import WAIT_SECONDS
+from config import AWS_REGION
+from constants import WAIT_SECONDS
 
 log = logging.getLogger("test_things_report_job_service")
 
