@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=".env.test")
 
 AWS_REGION = os.environ.get("AWS_REGION")
+
 THING_PAYLOADS_DB_NAME = os.environ.get("THING_PAYLOADS_DB_NAME")
 QUEUE_WAIT_SECONDS = int(os.environ.get("QUEUE_WAIT_SECONDS"))
 THINGS_REPORT_JOB_QUEUE = os.environ.get("THINGS_REPORT_JOB_QUEUE")
