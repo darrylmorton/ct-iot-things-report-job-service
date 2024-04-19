@@ -5,15 +5,15 @@ import boto3
 import pytest
 import uuid
 
-from ..helper.db_helper import assert_thing_payloads, create_thing_payloads_data
+from tests.helper.db_helper import assert_thing_payloads, create_thing_payloads_data
 from crud import find_thing_payloads_by_timestamps
-from ..helper.archive_job_helper import (
+from tests.helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
     assert_archive_job_messages,
 )
-from ..helper.helper import create_sqs_queue
-from config import (
+from tests.helper.helper import create_sqs_queue
+from tests.config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
@@ -25,7 +25,7 @@ from util.s3_util import (
     write_data_to_csv,
     s3_upload_csv,
 )
-from ..helper.job_helper import (
+from tests.helper.job_helper import (
     service_poll,
     create_job_messages,
     create_csv_rows_data,

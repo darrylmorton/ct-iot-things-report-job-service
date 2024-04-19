@@ -1,17 +1,10 @@
 import os
-import logging
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=".env.test")
 
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
-
-ENVIRONMENT = os.environ.get("ENVIRONMENT")
-LOG_LEVEL = os.environ.get("LOG_LEVEL")
-SERVICE_NAME = os.environ.get("SERVICE_NAME")
 THING_PAYLOADS_DB_NAME = os.environ.get("THING_PAYLOADS_DB_NAME")
 QUEUE_WAIT_SECONDS = int(os.environ.get("QUEUE_WAIT_SECONDS"))
 THINGS_REPORT_JOB_QUEUE = os.environ.get("THINGS_REPORT_JOB_QUEUE")
@@ -33,10 +26,3 @@ DATABASE_URL_SUFFIX = (
     )
 )
 DATABASE_URL = f"{DATABASE_URL_PREFIX}://{DATABASE_URL_SUFFIX}"
-
-
-def get_logger() -> logging.Logger:
-    logger = logging.getLogger("uvicorn")
-    logger.setLevel(logging.getLevelName(LOG_LEVEL))
-
-    return logger

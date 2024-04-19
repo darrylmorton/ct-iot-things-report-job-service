@@ -4,10 +4,9 @@ import time
 import uuid
 from typing import Any
 
-from constants import WAIT_SECONDS
-from config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
+from tests.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX, QUEUE_WAIT_SECONDS
 from util.s3_util import isodate_to_timestamp
-from ..helper.helper import validate_uuid4
+from tests.helper.helper import validate_uuid4
 from things_report_job_service.service import ThingsReportJobService
 from util.service_util import create_archive_job_message
 
@@ -66,7 +65,7 @@ async def report_archive_job_consumer(
         archive_job_messages = report_archive_job_queue.receive_messages(
             MessageAttributeNames=["All"],
             MaxNumberOfMessages=10,
-            WaitTimeSeconds=WAIT_SECONDS,
+            WaitTimeSeconds=QUEUE_WAIT_SECONDS,
         )
 
         for archive_job_message in archive_job_messages:

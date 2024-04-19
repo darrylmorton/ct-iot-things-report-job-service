@@ -5,7 +5,6 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from constants import WAIT_SECONDS
 from schemas import CSVRow
 from util.service_util import create_archive_job_message
 from config import (
@@ -13,6 +12,7 @@ from config import (
     AWS_REGION,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
+    QUEUE_WAIT_SECONDS,
 )
 from util.s3_util import (
     write_data_to_csv,
@@ -88,7 +88,7 @@ class ThingsReportJobService:
             job_messages = self.report_job_queue.receive_messages(
                 MessageAttributeNames=["All"],
                 MaxNumberOfMessages=10,
-                WaitTimeSeconds=WAIT_SECONDS,
+                WaitTimeSeconds=QUEUE_WAIT_SECONDS,
             )
 
             if len(job_messages) > 0:
