@@ -1,15 +1,52 @@
-name: Tests
+name: Lint, Tests
 
 on:
   push:
-    branches-ignore: [ "main" ]
+    branches-ignore: ["main"]
 
 env:
-  AWS_REGION: "eu-west-2"
+  SERVICE_NAME: test-report-job-service
+  LOG_LEVEL: DEBUG
+  ENVIRONMENT: TEST
+  DB_USERNAME: postgres
+  DB_PASSWORD: postgres
+  DB_HOST: localhost
+  DB_PORT: 5432
+  DB_NAME: things
 
 jobs:
-  test:
+
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up python:wq
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Load cached Poetry installation
+        id: cached-poetry
+        uses: actions/cache@v4
+        with:
+          path: ~/.local  # the path depends on the OS
+          key: poetry-0  # increment to reset cache
+
+      - name: Install Poetry
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        uses: snok/install-poetry@v1
+
+      - name: Install project
+        run: poetry install
+
+      - name: Run lint
+        run: make lint
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: [ lint ]
 
     steps:
       - name: Check out repository
@@ -22,7 +59,7 @@ jobs:
 
       - name: Load cached Poetry installation
         id: cached-poetry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.local  # the path depends on the OS
           key: poetry-0  # increment to reset cache
@@ -32,9 +69,45 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install project
-        run: poetry install --no-interaction --no-root
+        run: poetry install
 
-      - name: Run lint
-        run: make lint
-#      - name: Run tests
-#        run: make test
+      - name: Run unit tests
+        run: make test-unit
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: [ lint ]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up python:wq
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Load cached Poetry installation
+        id: cached-poetry
+        uses: actions/cache@v4
+        with:
+          path: ~/.local  # the path depends on the OS
+          key: poetry-0  # increment to reset cache
+
+      - name: Install Poetry
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        uses: snok/install-poetry@v1
+
+      - name: Install project
+        run: poetry install
+
+      - name: Setup dependencies
+        run: docker-compose up -d
+
+      - name: Sleep
+        uses: kibertoad/wait-action@1.0.1
+        with:
+          time: '5s'
+
+      - name: Run integration tests
+        run: make test-integration

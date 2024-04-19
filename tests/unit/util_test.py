@@ -3,7 +3,7 @@ import datetime
 
 import uuid
 
-from config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
+from tests.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from util.s3_util import create_csv_report_job_path
 from util.service_util import (
     create_default_epoch_timestamps,

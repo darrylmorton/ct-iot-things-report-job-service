@@ -1,27 +1,23 @@
 fmt:
 	poetry run ruff format .
-.PHONY:fmt
+.PHONY: fmt
 
 lint: fmt
 	poetry run ruff check . --fix
-.PHONY:lint
+.PHONY: lint
 
 server-start: fmt
 	poetry run python -m things_report_job_service
-.PHONY:server-start
+.PHONY: server-start
 
 test-unit: fmt
 	poetry run pytest tests/unit/
-.PHONY:test-unit
+.PHONY: test-unit
 
 test-integration: fmt
 	poetry run pytest tests/integration/
-.PHONY:test-integration
-
-test-integration-with-server: server-start
-	poetry run pytest tests/integration/
-.PHONY:test-integration-with-server
+.PHONY: test-integration
 
 test: fmt
 	poetry run pytest tests/
-.PHONY:test
+.PHONY: test
