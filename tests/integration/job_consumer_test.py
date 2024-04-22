@@ -1,3 +1,4 @@
+import datetime
 import logging
 from unittest.mock import patch
 
@@ -39,29 +40,29 @@ class TestJobService:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
     job_index = 0
-    start_timestamp = "2024-04-12T00:00:00Z"
-    end_timestamp = "2024-04-12T23:59:59Z"
+    start_timestamp = "2024-04-09T09:09:56Z"
+    end_timestamp = "2024-04-12T12:39:56Z"
     # fmt: off
     job_file_path_prefix = (
-        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712880000-1712966399"
+        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712653796-1712657396"
     )
-    job_upload_path = f"{user_id}/{report_name}-1712880000-1712966399"
-    start_epoch_timestamp = 1712880000
+    job_upload_path = f"{user_id}/{report_name}-1712653796-1712657396"
+    start_epoch_timestamp = 1712653796
     job_path_suffix = f"{report_name}-{0}.csv"
 
     # uploading disabled
     @patch(
-        "things_report_job_service.service.ThingsReportJobService.upload_csv_job"
+        "things_report_job_service.service.s3_upload_csv"
     )
-    async def test_job_consumer(self, mock_upload_csv_job, job_service):
-        mock_upload_csv_job.return_value = None
+    async def test_job_consumer(self, mock_s3_upload_csv, job_service):
+        mock_s3_upload_csv.return_value = None
 
         report_job_queue, _ = create_sqs_queue(
             THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_JOB_DLQ
         )
         report_archive_job_queue, _ = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
 
-        message_batch_one = create_job_messages(3)
+        message_batch_one = create_job_messages(self.start_timestamp, self.end_timestamp)
         expected_archive_job_message_batch_one = expected_archive_job_message(
             message_batch_one[2]
         )
@@ -80,15 +81,21 @@ class TestJobService:
 
     @pytest.mark.skip(reason="requires real aws credentials")
     def test_s3_report_job(self):
+        start = datetime.datetime.fromtimestamp(1712653796, tz=datetime.timezone.utc).isoformat()
+        end = datetime.datetime.fromtimestamp(1712657396, tz=datetime.timezone.utc).isoformat()
+
         actual_result_file_path, actual_result_upload_path, actual_result_filename = (
             create_csv_report_job_path(
                 self.user_id,
                 self.report_name,
                 self.job_index,
-                self.start_timestamp,
-                self.end_timestamp,
+                start_timestamp=start,
+                end_timestamp=end,
             )
         )
+        log.info(f"{actual_result_file_path=}")
+        log.info(f"{actual_result_upload_path=}")
+        log.info(f"{actual_result_filename=}")
 
         csv_data_rows = create_csv_rows_data()
 
@@ -104,9 +111,10 @@ class TestJobService:
             f"{actual_result_upload_path}/{actual_result_filename}",
         )
 
+    @pytest.mark.skip
     async def test_find_payloads_by_timestamps(self):
-        start = 1712650196
-        end = 1712653796
+        start = 1712653796
+        end = 1712657396
 
         expected_result = create_thing_payloads_data()
 

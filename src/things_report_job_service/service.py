@@ -5,7 +5,6 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from schemas import CSVRow
 from util.service_util import create_archive_job_message
 from config import (
     THINGS_REPORT_JOB_QUEUE,
@@ -45,7 +44,6 @@ class ThingsReportJobService:
         start_timestamp = message_body["StartTimestamp"]
         end_timestamp = message_body["EndTimestamp"]
         archive_report = message_body["ArchiveReport"]
-
         (
             report_job_file_path,
             report_job_upload_path,
@@ -120,11 +118,11 @@ class ThingsReportJobService:
         )
 
         try:
-            result: list[CSVRow] = await create_csv_rows(
+            csv_data_rows: list[dict] = await create_csv_rows(
                 user_id, start_timestamp, end_timestamp
             )
 
-            write_data_to_csv(report_job_file_path, report_job_filename, result)
+            write_data_to_csv(report_job_file_path, report_job_filename, csv_data_rows)
 
             s3_upload_csv(
                 self.s3_client,
