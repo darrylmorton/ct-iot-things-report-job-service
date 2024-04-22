@@ -99,9 +99,6 @@ class TestJobService:
                 end_timestamp=end,
             )
         )
-        log.info(f"{actual_result_file_path=}")
-        log.info(f"{actual_result_upload_path=}")
-        log.info(f"{actual_result_filename=}")
 
         csv_data_rows = create_csv_rows_data()
 

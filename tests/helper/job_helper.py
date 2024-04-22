@@ -120,14 +120,10 @@ def create_mass_job_messages(total: int, offset=0) -> list[dict]:
 
         start_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00Z"
         start_timestamp = datetime.datetime.fromisoformat(start_timestamp_isoformat)
-        log.info(f"{start_timestamp_isoformat=}")
-        log.info(f"{start_timestamp=}")
 
         year_delta = year_delta + 1
         end_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00Z"
         end_timestamp = datetime.datetime.fromisoformat(end_timestamp_isoformat)
-        log.info(f"{end_timestamp_isoformat=}")
-        log.info(f"{end_timestamp=}")
 
         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
 
