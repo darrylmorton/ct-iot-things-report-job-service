@@ -12,8 +12,11 @@ def isodate_to_timestamp(timestamp: str) -> int:
     return int(isoparse(timestamp).timestamp())
 
 
-def get_date_range_days(start: datetime, end: datetime) -> int:
-    return int((end - start).days)
+def get_date_range_days(start: str, end: str) -> int:
+    start_timestamp = datetime.datetime.fromisoformat(start)
+    end_timestamp = datetime.datetime.fromisoformat(end)
+
+    return int((end_timestamp - start_timestamp).days)
 
 
 def create_default_epoch_timestamps() -> Tuple[int, int]:

@@ -30,7 +30,7 @@ def create_csv_report_job_path(
     return report_job_file_path, report_job_upload_path, report_job_filename
 
 
-def create_csv_row(user_id: str, thing_payload: ThingPayload) -> CSVRow:
+def create_csv_row(user_id: str, thing_payload: ThingPayload) -> dict:
     device_id = thing_payload.device_id
     payload_timestamp = thing_payload.payload_timestamp
 
@@ -40,24 +40,26 @@ def create_csv_row(user_id: str, thing_payload: ThingPayload) -> CSVRow:
     temperature = payload["temperature"]
     humidity = payload["humidity"]
 
-    return CSVRow(
-        user_id=user_id,
-        device_id=device_id,
-        payload_timestamp=payload_timestamp,
-        cadence_unit=cadence["unit"],
-        cadence_value=cadence["value"],
-        temperature_unit=temperature["unit"],
-        temperature_value=temperature["value"],
-        humidity_unit=humidity["unit"],
-        humidity_value=humidity["value"],
-        battery_unit=battery["unit"],
-        battery_value=battery["value"],
+    return dict(
+        CSVRow(
+            user_id=user_id,
+            device_id=device_id,
+            payload_timestamp=payload_timestamp,
+            cadence_unit=cadence["unit"],
+            cadence_value=cadence["value"],
+            temperature_unit=temperature["unit"],
+            temperature_value=temperature["value"],
+            humidity_unit=humidity["unit"],
+            humidity_value=humidity["value"],
+            battery_unit=battery["unit"],
+            battery_value=battery["value"],
+        )
     )
 
 
 async def create_csv_rows(
     user_id: str, start_timestamp: str, end_timestamp: str
-) -> list[CSVRow]:
+) -> list[dict]:
     if not start_timestamp or not end_timestamp:
         start_timestamp, end_timestamp = create_default_epoch_timestamps()
     else:
@@ -68,7 +70,7 @@ async def create_csv_rows(
         start_timestamp, end_timestamp
     )
 
-    csv_rows: list[CSVRow] = []
+    csv_rows: list[dict] = []
 
     for item in thing_payloads_result:
         csv_rows.append(create_csv_row(user_id, item))

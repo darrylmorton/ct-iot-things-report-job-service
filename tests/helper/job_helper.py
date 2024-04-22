@@ -82,7 +82,36 @@ def create_job_message(
     )
 
 
-def create_job_messages(total: int, offset=0) -> list[dict]:
+def create_job_messages(
+    start_timestamp_isoformat: str, end_timestamp_isoformat: str
+) -> list[dict]:
+    messages = []
+
+    date_range_days = get_date_range_days(
+        start_timestamp_isoformat, end_timestamp_isoformat
+    )
+
+    for counter in range(date_range_days):
+        message_id = str(uuid.uuid4())
+        user_id = str(uuid.uuid4())
+        archive_report = counter == date_range_days - 1
+
+        job_message = create_job_message(
+            message_id,
+            user_id,
+            report_name="report_name_0",
+            start_timestamp=f"{start_timestamp_isoformat}",
+            end_timestamp=f"{end_timestamp_isoformat}",
+            job_index=f"{counter}",
+            total_jobs=f"{date_range_days}",
+            archive_report=f"{archive_report}",
+        )
+        messages.append(job_message)
+
+    return messages
+
+
+def create_mass_job_messages(total: int, offset=0) -> list[dict]:
     messages = []
     year_delta = 10
 
@@ -94,7 +123,6 @@ def create_job_messages(total: int, offset=0) -> list[dict]:
 
         year_delta = year_delta + 1
         end_timestamp_isoformat = f"20{year_delta}-01-01T00:00:00Z"
-
         end_timestamp = datetime.datetime.fromisoformat(end_timestamp_isoformat)
 
         date_range_days = get_date_range_days(start_timestamp, end_timestamp)
@@ -107,8 +135,8 @@ def create_job_messages(total: int, offset=0) -> list[dict]:
             message_id,
             user_id,
             report_name="report_name_0",
-            start_timestamp=f"{start_timestamp}",
-            end_timestamp=f"{end_timestamp}",
+            start_timestamp=f"{start_timestamp_isoformat}",
+            end_timestamp=f"{end_timestamp_isoformat}",
             job_index=f"{index}",
             total_jobs=f"{date_range_days}",
             archive_report=f"{archive_report}",
