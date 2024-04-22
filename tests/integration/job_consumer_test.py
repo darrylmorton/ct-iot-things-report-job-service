@@ -62,7 +62,9 @@ class TestJobService:
         )
         report_archive_job_queue, _ = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
 
-        message_batch_one = create_job_messages(self.start_timestamp, self.end_timestamp)
+        message_batch_one = create_job_messages(
+            self.start_timestamp, self.end_timestamp
+        )
         expected_archive_job_message_batch_one = expected_archive_job_message(
             message_batch_one[2]
         )
@@ -81,8 +83,12 @@ class TestJobService:
 
     @pytest.mark.skip(reason="requires real aws credentials")
     def test_s3_report_job(self):
-        start = datetime.datetime.fromtimestamp(1712653796, tz=datetime.timezone.utc).isoformat()
-        end = datetime.datetime.fromtimestamp(1712657396, tz=datetime.timezone.utc).isoformat()
+        start = datetime.datetime.fromtimestamp(
+            1712653796, tz=datetime.timezone.utc
+        ).isoformat()
+        end = datetime.datetime.fromtimestamp(
+            1712657396, tz=datetime.timezone.utc
+        ).isoformat()
 
         actual_result_file_path, actual_result_upload_path, actual_result_filename = (
             create_csv_report_job_path(
