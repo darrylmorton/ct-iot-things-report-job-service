@@ -10,7 +10,8 @@ from config import (
     AWS_REGION,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
-    QUEUE_WAIT_SECONDS, get_logger,
+    QUEUE_WAIT_SECONDS,
+    get_logger,
 )
 from util.s3_util import (
     write_data_to_csv,

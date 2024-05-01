@@ -3,12 +3,11 @@ from typing import Any
 import logging
 
 from schemas import ThingPayload
-from models import ThingPayloadModel
 
 log = logging.getLogger("test_things_report_job_service")
 
 
-def create_thing_payloads_data() -> list[ThingPayloadModel]:
+def create_thing_payloads_data() -> list[ThingPayload]:
     return [
         # {
         #     "device_id": "aaa-111111",

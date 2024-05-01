@@ -13,13 +13,8 @@ packages = [{ include = "things_report_job_service", from = "src" }]
 python = "^3.12.0"
 boto3 = "^1.34.23"
 python-dotenv = "^1.0.0"
-sqlalchemy = "^2.0.29"
-asyncpg = "^0.29.0"
-psycopg2-binary = "^2.9.9"
-psycopg = "^3.1.18"
 structlog = "^24.1.0"
 pydantic = "^2.6.4"
-async-sqlalchemy = "^1.0.0"
 greenlet = "^3.0.3"
 
 [tool.poetry.group.test.dependencies]

@@ -7,7 +7,6 @@ import uuid
 
 from config import get_logger
 from tests.helper.db_helper import assert_thing_payloads, create_thing_payloads_data
-from crud import find_thing_payloads_by_timestamps
 from tests.helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
