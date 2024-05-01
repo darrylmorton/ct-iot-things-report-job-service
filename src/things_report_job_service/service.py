@@ -2,7 +2,6 @@ import json
 import uuid
 
 import boto3
-import requests
 from botocore.exceptions import ClientError
 
 from schemas import ThingPayload
@@ -68,9 +67,6 @@ class ThingsReportJobService:
             await self.produce([archive_message])
         else:
             response_body = get_thing_payloads(start_timestamp, end_timestamp)
-            log.info(f"UPLOAD CSV JOB {response_body=}")
-
-            # response_body = json.dumps(response_body)
 
             await self.upload_csv_job(
                 user_id,
@@ -132,11 +128,6 @@ class ThingsReportJobService:
         )
 
         try:
-            # response_body = get_thing_payloads(start_timestamp, end_timestamp)
-            # log.info(f"UPLOAD CSV JOB {response_body=}")
-            #
-            # response_body = json.dumps(response_body)
-
             csv_data_rows: list[dict] = create_csv_rows(user_id, response_body)
 
             write_data_to_csv(report_job_file_path, report_job_filename, csv_data_rows)

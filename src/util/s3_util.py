@@ -1,18 +1,14 @@
 import csv
 import os
 
-import requests
-
 from schemas import ThingPayload, CSVRow
 from util.service_util import (
     isodate_to_timestamp,
-    create_default_epoch_timestamps,
 )
 from config import (
     THINGS_REPORT_JOB_BUCKET_NAME,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
     get_logger,
-    THING_PAYLOADS_SERVICE_URL,
 )
 
 log = get_logger()
@@ -61,7 +57,7 @@ def create_csv_row(user_id: str, thing_payload: ThingPayload) -> dict:
     )
 
 
-def create_csv_rows(user_id: str, response_body: list[dict]) -> list[dict]:
+def create_csv_rows(user_id: str, response_body: list[ThingPayload]) -> list[dict]:
     csv_rows: list[dict] = []
 
     for item in response_body:
