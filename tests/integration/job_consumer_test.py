@@ -6,6 +6,7 @@ import pytest
 import uuid
 
 from config import get_logger
+from tests.helper.thing_payloads_helper import expected_thing_payloads
 from tests.helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
@@ -53,9 +54,47 @@ class TestJobService:
     )
     job_path_suffix = f"{report_name}-{0}.csv"
 
+    # thing-payloads-service request mocked
+    # uploading disabled
+    @patch("util.service_util.get_thing_payloads")
+    @patch("things_report_job_service.service.s3_upload_csv")
+    async def test_job_consumer_with_thing_payloads_request_and_uploading_mocks(
+            self, mock_get_thing_payloads, mock_s3_upload_csv, job_service
+    ):
+        mock_get_thing_payloads.return_value = expected_thing_payloads()
+        mock_s3_upload_csv.return_value = None
+
+        report_job_queue, _ = create_sqs_queue(
+            THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_JOB_DLQ
+        )
+        report_archive_job_queue, _ = create_sqs_queue(THINGS_REPORT_ARCHIVE_JOB_QUEUE)
+
+        message_batch_one = create_job_messages(
+            self.start_timestamp, self.end_timestamp
+        )
+
+        expected_archive_job_message_batch_one = expected_archive_job_message(
+            message_batch_one[2]
+        )
+
+        report_job_queue.send_messages(Entries=message_batch_one)
+        await service_poll(job_service, 10)
+
+        actual_archive_job_messages_batch_one = await report_archive_job_consumer(
+            report_archive_job_queue, 10
+        )
+
+        assert_archive_job_messages(
+            actual_archive_job_messages_batch_one,
+            expected_archive_job_message_batch_one,
+        )
+
     # uploading disabled
     @patch("things_report_job_service.service.s3_upload_csv")
-    async def test_job_consumer(self, mock_s3_upload_csv, job_service):
+    @pytest.mark.skip(reason="requires running thing-payloads-service")
+    async def test_job_consumer_with_upload_mock(
+            self, mock_s3_upload_csv, job_service
+    ):
         mock_s3_upload_csv.return_value = None
 
         report_job_queue, _ = create_sqs_queue(

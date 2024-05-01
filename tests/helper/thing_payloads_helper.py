@@ -1,8 +1,9 @@
+
 from schemas import ThingPayload
 
 
-def expected_thing_payloads() -> list[ThingPayload]:
-    return [
+def expected_thing_payloads() -> tuple[int, list[ThingPayload]]:
+    return 200, [
         {
             "id": "601c61ee-0e30-42dc-9dc0-83c7d2d3bcad",
             "device_id": "aaa-111111",

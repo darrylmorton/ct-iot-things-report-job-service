@@ -75,7 +75,7 @@ def create_archive_job_message(
 
 def get_thing_payloads(
     start_timestamp: int, end_timestamp: int
-) -> (int, list[ThingPayload]):
+) -> tuple[int, list[ThingPayload]]:
     response = requests.get(
         THING_PAYLOADS_SERVICE_URL,
         params={"start_timestamp": start_timestamp, "end_timestamp": end_timestamp},

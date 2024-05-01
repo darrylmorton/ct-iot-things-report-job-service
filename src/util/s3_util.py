@@ -75,6 +75,8 @@ async def create_csv_rows(
 
         raise ValueError(f"Failed to get thing-payloads for user {user_id}")
 
+    # response_body = response.json()
+
     csv_rows: list[dict] = []
 
     for item in response_body:
