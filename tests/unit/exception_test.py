@@ -1,8 +1,4 @@
-import logging
-
 import pytest
-
-log = logging.getLogger("test_things_report_job_service")
 
 
 class TestException:

@@ -1,9 +1,9 @@
 import asyncio
-import logging
 
+from config import get_logger
 from things_report_job_service.service import ThingsReportJobService
 
-log = logging.getLogger("things_report_job_service")
+log = get_logger()
 
 
 async def main() -> None:

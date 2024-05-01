@@ -11,7 +11,7 @@ then places an `archive job message` onto the `job-archive-queue`.
 
 python v3.12+  
 poetry v1.7.1
-[thing-service](https://github.com/darrylmorton/ct-iot-thing-service) (for running tests only)
+[thing-payloads-service](https://github.com/darrylmorton/ct-iot-thing-payloads-service) (for running tests only)
 
 ## Run
 
@@ -21,7 +21,7 @@ make server-start
 
 ## Test
 
-Use the `thing-service` repo to run the database container, with migrate and seed npm run scripts:
+Use the `thing-payloads-service` repo to run the database container, with migrate and seed npm run scripts:
 
 ```
 docker-compose up -d
@@ -37,4 +37,4 @@ make test
 
 ## Deployment
 
-Must be deployed **after** `things-service`,  `things report job queue` and ` things report archive job queue`.
+Must be deployed **after** `thing-payloads-service`,  `things report job queue` and ` things report archive job queue`.

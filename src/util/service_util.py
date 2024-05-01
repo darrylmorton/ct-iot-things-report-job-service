@@ -1,11 +1,12 @@
 import datetime
 import json
-import logging
 from typing import Tuple
 
 from dateutil.parser import isoparse
 
-log = logging.getLogger("things_report_job_service")
+from config import get_logger
+
+log = get_logger()
 
 
 def isodate_to_timestamp(timestamp: str) -> int:
@@ -20,7 +21,7 @@ def get_date_range_days(start: str, end: str) -> int:
 
 
 def create_default_epoch_timestamps() -> Tuple[int, int]:
-    today = datetime.datetime.now(tz=datetime.timezone.utc)
+    today = datetime.datetime.now(datetime.UTC)
 
     today_timestamp = int(today.timestamp())
     yesterday_timestamp = int((today - datetime.timedelta(days=1)).timestamp())

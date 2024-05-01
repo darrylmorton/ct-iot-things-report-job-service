@@ -1,11 +1,11 @@
 import datetime
-import logging
 from unittest.mock import patch
 
 import boto3
 import pytest
 import uuid
 
+from config import get_logger
 from tests.helper.db_helper import assert_thing_payloads, create_thing_payloads_data
 from crud import find_thing_payloads_by_timestamps
 from tests.helper.archive_job_helper import (
@@ -31,8 +31,9 @@ from tests.helper.job_helper import (
     create_job_messages,
     create_csv_rows_data,
 )
+from util.service_util import isodate_to_timestamp
 
-log = logging.getLogger("test_things_report_job_service")
+log = get_logger()
 
 
 @pytest.mark.asyncio
@@ -40,14 +41,16 @@ class TestJobService:
     user_id = str(uuid.uuid4())
     report_name = "report_name_0"
     job_index = 0
-    start_timestamp = "2024-04-09T09:09:56Z"
-    end_timestamp = "2024-04-12T12:39:56Z"
+    start_timestamp = "2020-06-20T12:00:00Z"
+    start_epoch_timestamp = isodate_to_timestamp(start_timestamp)
+    end_timestamp = "2020-06-23T12:00:00Z"
+    end_epoch_timestamp = isodate_to_timestamp(end_timestamp)
+    log.info(f"{start_epoch_timestamp=} {end_epoch_timestamp=}")
     # fmt: off
     job_file_path_prefix = (
-        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712653796-1712657396"
+        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     )
-    job_upload_path = f"{user_id}/{report_name}-1712653796-1712657396"
-    start_epoch_timestamp = 1712653796
+    job_upload_path = f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     job_path_suffix = f"{report_name}-{0}.csv"
 
     # uploading disabled
@@ -65,6 +68,8 @@ class TestJobService:
         message_batch_one = create_job_messages(
             self.start_timestamp, self.end_timestamp
         )
+        log.info(f"{message_batch_one=}")
+
         expected_archive_job_message_batch_one = expected_archive_job_message(
             message_batch_one[2]
         )
@@ -84,10 +89,10 @@ class TestJobService:
     @pytest.mark.skip(reason="requires real aws credentials")
     def test_s3_report_job(self):
         start = datetime.datetime.fromtimestamp(
-            1712653796, tz=datetime.timezone.utc
+            self.start_epoch_timestamp, tz=datetime.timezone.utc
         ).isoformat()
         end = datetime.datetime.fromtimestamp(
-            1712657396, tz=datetime.timezone.utc
+            self.start_epoch_timestamp, tz=datetime.timezone.utc
         ).isoformat()
 
         actual_result_file_path, actual_result_upload_path, actual_result_filename = (
@@ -116,8 +121,8 @@ class TestJobService:
 
     @pytest.mark.skip
     async def test_find_payloads_by_timestamps(self):
-        start = 1712653796
-        end = 1712657396
+        start = self.start_epoch_timestamp
+        end = self.end_epoch_timestamp
 
         expected_result = create_thing_payloads_data()
 

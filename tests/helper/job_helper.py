@@ -1,14 +1,14 @@
 import datetime
 import json
-import logging
 import time
 import uuid
 
+from config import get_logger
 from schemas import CSVRow
 from things_report_job_service.service import ThingsReportJobService
 from util.service_util import get_date_range_days, isodate_to_timestamp
 
-log = logging.getLogger("test_things_report_job_service")
+log = get_logger()
 
 
 async def service_poll(job_service: ThingsReportJobService, timeout_seconds=0) -> None:

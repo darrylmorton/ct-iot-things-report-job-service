@@ -1,14 +1,14 @@
 import datetime
 import json
-import logging
 import uuid
 from typing import Any
 
 import boto3
 
+from config import get_logger
 from tests.config import AWS_REGION, QUEUE_WAIT_SECONDS
 
-log = logging.getLogger("test_things_report_job_service")
+log = get_logger()
 
 
 def create_sqs_queue(queue_name: str, dlq_name="") -> tuple[Any, Any]:
@@ -39,7 +39,7 @@ def create_sqs_queue(queue_name: str, dlq_name="") -> tuple[Any, Any]:
 
 def create_timestamp(days: int = 0, before: bool = False) -> datetime:
     delta = datetime.timedelta(days=days)
-    timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
+    timestamp = datetime.datetime.now(datetime.UTC)
 
     if before:
         return timestamp - delta

@@ -1,16 +1,20 @@
 import csv
-import logging
 import os
+import requests
 
 from schemas import ThingPayload, CSVRow
-from .service_util import (
+from util.service_util import (
     create_default_epoch_timestamps,
     isodate_to_timestamp,
 )
-from config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
-from crud import find_thing_payloads_by_timestamps
+from config import (
+    THINGS_REPORT_JOB_BUCKET_NAME,
+    THINGS_REPORT_JOB_FILE_PATH_PREFIX,
+    get_logger,
+    THING_PAYLOADS_SERVICE_URL,
+)
 
-log = logging.getLogger("things_report_job_service")
+log = get_logger()
 
 
 def create_csv_report_job_path(
@@ -31,10 +35,9 @@ def create_csv_report_job_path(
 
 
 def create_csv_row(user_id: str, thing_payload: ThingPayload) -> dict:
-    device_id = thing_payload.device_id
-    payload_timestamp = thing_payload.payload_timestamp
-
-    payload = thing_payload.payload
+    device_id = thing_payload["device_id"]
+    payload_timestamp = thing_payload["payload_timestamp"]
+    payload = thing_payload["payload"]
     cadence = payload["cadence"]
     battery = payload["battery"]
     temperature = payload["temperature"]
@@ -66,13 +69,21 @@ async def create_csv_rows(
         start_timestamp = isodate_to_timestamp(start_timestamp)
         end_timestamp = isodate_to_timestamp(end_timestamp)
 
-    thing_payloads_result = await find_thing_payloads_by_timestamps(
-        start_timestamp, end_timestamp
+    response = requests.get(
+        THING_PAYLOADS_SERVICE_URL,
+        params={"start_timestamp": start_timestamp, "end_timestamp": end_timestamp},
     )
+
+    if response.status_code != 200:
+        log.error(f"Failed to get thing-payloads for user {user_id}")
+
+        raise ValueError(f"Failed to get thing-payloads for user {user_id}")
+
+    response_body = response.json()
 
     csv_rows: list[dict] = []
 
-    for item in thing_payloads_result:
+    for item in response_body:
         csv_rows.append(create_csv_row(user_id, item))
 
     return csv_rows
