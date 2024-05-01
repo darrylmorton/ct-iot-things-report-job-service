@@ -62,7 +62,9 @@ class TestJobService:
     async def test_job_consumer_with_thing_payloads_request_and_uploading_mocks(
             self, mock_get_thing_payloads, mock_s3_upload_csv, job_service
     ):
-        mock_get_thing_payloads.return_value = MagicMock(return_value=expected_thing_payloads())
+        mock_get_thing_payloads.return_value = MagicMock(
+            return_value=expected_thing_payloads()
+        )
         mock_s3_upload_csv.return_value = MagicMock(return_value=None)
 
         report_job_queue, _ = create_sqs_queue(

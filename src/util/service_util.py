@@ -85,8 +85,8 @@ def get_thing_payloads(start_timestamp: str, end_timestamp: str) -> list[ThingPa
     )
 
     if response.status_code != 200:
-        log.error(f"Failed to get thing-payloads")
+        log.error("Failed to get thing-payloads")
 
-        raise requests.HTTPError(f"Failed to get thing-payloads")
+        raise requests.HTTPError("Failed to get thing-payloads")
 
     return response.json()
