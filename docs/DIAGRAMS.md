@@ -34,7 +34,7 @@ classDiagram
 
 ```mermaid
 ---
-title: From (SQLAlchemy) ThingPayloadModel to (Pydantic) ThingPayload Schema
+title: Pydantic Schemas
 ---
 
 classDiagram
@@ -65,24 +65,13 @@ classDiagram
         +Payload: payload
     }
     
-    class ThingPayloadModel {
-        +uuid: id
-        +varchar: device_id
-        +integer: payload_timestamp
-        +jsonb: payload
-        +timestamp with time zone: updated_at
-        +timestamp with time zone: created_at
-    }
-    
     PayloadUnitValue <|-- Temperature
     Temperature <|-- Humidity
     
     Payload *-- PayloadUnitValue
     Payload *-- Temperature
     Payload *-- Humidity
-    Payload *-- ThingPayload
-    
-    ThingPayload .. ThingPayloadModel
+    Payload *-- ThingPayload    
 ```
 
 ```mermaid
@@ -90,7 +79,7 @@ flowchart LR
 
 ReportJobService_Flow_Chart
 
-Report_Request_Queue -->|Report Job Message| Report_Job_Service <-->|1 - Report Query| Things_Database
+Report_Request_Queue -->|Report Job Message| Report_Job_Service <-->|1 - Report Request| Thing_Payloads_Service
 Report_Job_Service -->|2. Write to CSV| S3
 Report_Job_Service -->|Report Archive Job Message| Report_Archive_Queue
 ```
