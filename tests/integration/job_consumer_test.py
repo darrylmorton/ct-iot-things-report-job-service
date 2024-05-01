@@ -1,12 +1,16 @@
 import datetime
-from unittest.mock import patch
+import json
+from unittest.mock import patch, Mock, MagicMock
 
 import boto3
 import pytest
 import uuid
 
 from config import get_logger
-from tests.helper.thing_payloads_helper import expected_thing_payloads
+from tests.helper.thing_payloads_helper import (
+    expected_thing_payloads,
+    # expected_thing_payloads_data,
+)
 from tests.helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
@@ -54,15 +58,25 @@ class TestJobService:
     )
     job_path_suffix = f"{report_name}-{0}.csv"
 
+    # mock_get_thing_payloads, mock_s3_upload_csv,
+
     # thing-payloads-service request mocked
     # uploading disabled
-    @patch("util.service_util.get_thing_payloads")
+    @patch("things_report_job_service.service.get_thing_payloads")
     @patch("things_report_job_service.service.s3_upload_csv")
+    # @patch("things_report_job_service.service.get_thing_payloads", Mock(return_value=expected_thing_payloads()))
+    # @patch("things_report_job_service.service.s3_upload_csv", Mock(return_value=None))
     async def test_job_consumer_with_thing_payloads_request_and_uploading_mocks(
             self, mock_get_thing_payloads, mock_s3_upload_csv, job_service
     ):
-        mock_get_thing_payloads.return_value = expected_thing_payloads()
-        mock_s3_upload_csv.return_value = None
+        thing_payloads = expected_thing_payloads()
+        log.info(f"TEST {thing_payloads=}")
+
+        mock_get_thing_payloads.return_value = MagicMock(return_value=expected_thing_payloads())
+        mock_s3_upload_csv.return_value = MagicMock(return_value=None)
+
+        # mock_upload_csv_job.get_thing_payloads.return_value = thing_payloads
+        # mock_upload_csv_job.s3_upload_csv.return_value = None
 
         report_job_queue, _ = create_sqs_queue(
             THINGS_REPORT_JOB_QUEUE, THINGS_REPORT_JOB_DLQ

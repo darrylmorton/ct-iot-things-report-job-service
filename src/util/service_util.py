@@ -1,6 +1,5 @@
 import datetime
 import json
-from typing import Tuple
 
 import requests
 from dateutil.parser import isoparse
@@ -22,7 +21,7 @@ def get_date_range_days(start: str, end: str) -> int:
     return int((end_timestamp - start_timestamp).days)
 
 
-def create_default_epoch_timestamps() -> Tuple[int, int]:
+def create_default_epoch_timestamps() -> tuple[int, int]:
     today = datetime.datetime.now(datetime.UTC)
 
     today_timestamp = int(today.timestamp())
@@ -73,12 +72,21 @@ def create_archive_job_message(
     )
 
 
-def get_thing_payloads(
-    start_timestamp: int, end_timestamp: int
-) -> tuple[int, list[ThingPayload]]:
+def get_thing_payloads(start_timestamp: str, end_timestamp: str) -> list[ThingPayload]:
+    if not start_timestamp or not end_timestamp:
+        start_timestamp, end_timestamp = create_default_epoch_timestamps()
+    else:
+        start_timestamp = isodate_to_timestamp(start_timestamp)
+        end_timestamp = isodate_to_timestamp(end_timestamp)
+
     response = requests.get(
         THING_PAYLOADS_SERVICE_URL,
         params={"start_timestamp": start_timestamp, "end_timestamp": end_timestamp},
     )
 
-    return response.status_code, response.json()
+    if response.status_code != 200:
+        log.error(f"Failed to get thing-payloads")
+
+        raise requests.HTTPError(f"Failed to get thing-payloads")
+
+    return response.json()

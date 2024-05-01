@@ -2,9 +2,11 @@ import json
 import uuid
 
 import boto3
+import requests
 from botocore.exceptions import ClientError
 
-from util.service_util import create_archive_job_message
+from schemas import ThingPayload
+from util.service_util import create_archive_job_message, get_thing_payloads
 from config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
@@ -65,12 +67,18 @@ class ThingsReportJobService:
 
             await self.produce([archive_message])
         else:
+            response_body = get_thing_payloads(start_timestamp, end_timestamp)
+            log.info(f"UPLOAD CSV JOB {response_body=}")
+
+            # response_body = json.dumps(response_body)
+
             await self.upload_csv_job(
                 user_id,
                 report_name,
                 job_index,
                 start_timestamp,
                 end_timestamp,
+                response_body,
             )
 
     async def poll(self) -> None:
@@ -103,7 +111,13 @@ class ThingsReportJobService:
             raise error
 
     async def upload_csv_job(
-        self, user_id, report_name, job_index, start_timestamp, end_timestamp
+        self,
+        user_id: str,
+        report_name: str,
+        job_index: int,
+        start_timestamp: str,
+        end_timestamp: str,
+        response_body: list[ThingPayload],
     ) -> None:
         log.debug("Uploading job csv file...")
 
@@ -118,9 +132,12 @@ class ThingsReportJobService:
         )
 
         try:
-            csv_data_rows: list[dict] = await create_csv_rows(
-                user_id, start_timestamp, end_timestamp
-            )
+            # response_body = get_thing_payloads(start_timestamp, end_timestamp)
+            # log.info(f"UPLOAD CSV JOB {response_body=}")
+            #
+            # response_body = json.dumps(response_body)
+
+            csv_data_rows: list[dict] = create_csv_rows(user_id, response_body)
 
             write_data_to_csv(report_job_file_path, report_job_filename, csv_data_rows)
 
@@ -129,6 +146,8 @@ class ThingsReportJobService:
                 f"{report_job_file_path}/{report_job_filename}",
                 f"{report_job_upload_path}/{report_job_filename}",
             )
+        # except requests.HTTPError as error:
+        #     log.error(f"Http client thing-payloads error: {error}")
         except ClientError as error:
             log.error(f"S3 client upload error: {error}")
 

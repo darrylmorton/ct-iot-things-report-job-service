@@ -1,9 +1,14 @@
+import json
 
 from schemas import ThingPayload
+from config import get_logger
+
+log = get_logger()
 
 
-def expected_thing_payloads() -> tuple[int, list[ThingPayload]]:
-    return 200, [
+def expected_thing_payloads():
+    # return json.dumps()
+    return [
         {
             "id": "601c61ee-0e30-42dc-9dc0-83c7d2d3bcad",
             "device_id": "aaa-111111",
@@ -293,3 +298,38 @@ def expected_thing_payloads() -> tuple[int, list[ThingPayload]]:
             "payload_timestamp": 1592870400,
         },
     ]
+
+
+# def expected_thing_payloads() -> list[ThingPayload]:
+#     payloads = []
+#
+#     data = expected_thing_payloads_data()
+#
+#     for item in range(len(data)):
+#         # log.info(f"{data[item]=}")
+#         # payload = ThingPayload(data[item])
+#
+#         payload = ThingPayload.parse_raw(json.dumps(data[item]))  # .json()
+#         # payload = json.loads(item)
+#
+#         # payloads.append(
+#         #     ThingPayload(
+#         #         id=payload["id"],
+#         #         device_id=payload.device_id,
+#         #         payload=payload.thing_payload,
+#         #         payload_timestamp=payload.payload_timestamp,
+#         #     )
+#         # )
+#
+#         payloads.append(payload)
+#
+#         # payloads.append(
+#         #     ThingPayload(
+#         #         id=payload["id"],
+#         #         device_id=payload["device_id"],
+#         #         payload=payload["payload"],
+#         #         payload_timestamp=payload["payload_timestamp"],
+#         #     )
+#         # )
+#
+#     return payloads
