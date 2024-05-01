@@ -137,8 +137,6 @@ class ThingsReportJobService:
                 f"{report_job_file_path}/{report_job_filename}",
                 f"{report_job_upload_path}/{report_job_filename}",
             )
-        # except requests.HTTPError as error:
-        #     log.error(f"Http client thing-payloads error: {error}")
         except ClientError as error:
             log.error(f"S3 client upload error: {error}")
 
