@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from pydantic import BaseModel
 
 
@@ -35,7 +33,6 @@ class Payload(BaseModel):
         from_attributes = True
 
 
-@dataclass
 class ThingPayload(BaseModel):
     id: str
     device_id: str
