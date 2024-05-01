@@ -1,17 +1,16 @@
 import csv
 import os
-import requests
 
 from schemas import ThingPayload, CSVRow
 from util.service_util import (
     create_default_epoch_timestamps,
     isodate_to_timestamp,
+    get_thing_payloads,
 )
 from config import (
     THINGS_REPORT_JOB_BUCKET_NAME,
     THINGS_REPORT_JOB_FILE_PATH_PREFIX,
     get_logger,
-    THING_PAYLOADS_SERVICE_URL,
 )
 
 log = get_logger()
@@ -69,17 +68,12 @@ async def create_csv_rows(
         start_timestamp = isodate_to_timestamp(start_timestamp)
         end_timestamp = isodate_to_timestamp(end_timestamp)
 
-    response = requests.get(
-        THING_PAYLOADS_SERVICE_URL,
-        params={"start_timestamp": start_timestamp, "end_timestamp": end_timestamp},
-    )
+    status_code, response_body = get_thing_payloads(start_timestamp, end_timestamp)
 
-    if response.status_code != 200:
+    if status_code != 200:
         log.error(f"Failed to get thing-payloads for user {user_id}")
 
         raise ValueError(f"Failed to get thing-payloads for user {user_id}")
-
-    response_body = response.json()
 
     csv_rows: list[dict] = []
 

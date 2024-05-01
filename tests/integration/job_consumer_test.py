@@ -44,16 +44,17 @@ class TestJobService:
     end_timestamp = "2020-06-23T12:00:00Z"
     end_epoch_timestamp = isodate_to_timestamp(end_timestamp)
     # fmt: off
-    job_file_path_prefix = (
-        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
+    job_file_path_prefix = (f"""
+        {THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/
+        {report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}
+    """)
+    job_upload_path = (
+        f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     )
-    job_upload_path = f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     job_path_suffix = f"{report_name}-{0}.csv"
 
     # uploading disabled
-    @patch(
-        "things_report_job_service.service.s3_upload_csv"
-    )
+    @patch("things_report_job_service.service.s3_upload_csv")
     async def test_job_consumer(self, mock_s3_upload_csv, job_service):
         mock_s3_upload_csv.return_value = None
 

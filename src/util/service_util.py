@@ -2,9 +2,11 @@ import datetime
 import json
 from typing import Tuple
 
+import requests
 from dateutil.parser import isoparse
 
-from config import get_logger
+from config import get_logger, THING_PAYLOADS_SERVICE_URL
+from schemas import ThingPayload
 
 log = get_logger()
 
@@ -69,3 +71,14 @@ def create_archive_job_message(
         }),
         MessageDeduplicationId=message_id,
     )
+
+
+def get_thing_payloads(
+    start_timestamp: int, end_timestamp: int
+) -> (int, list[ThingPayload]):
+    response = requests.get(
+        THING_PAYLOADS_SERVICE_URL,
+        params={"start_timestamp": start_timestamp, "end_timestamp": end_timestamp},
+    )
+
+    return response.status_code, response.json()

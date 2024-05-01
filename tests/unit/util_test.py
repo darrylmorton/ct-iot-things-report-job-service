@@ -1,4 +1,3 @@
-import logging
 import datetime
 
 import uuid
@@ -26,7 +25,9 @@ class TestUtil:
     job_file_path_prefix = (
         f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     )
-    job_upload_path = f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
+    job_upload_path = (
+        f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
+    )
     job_path_suffix = f"{report_name}-{0}.csv"
 
     def test_csv_report_job_path(self):
