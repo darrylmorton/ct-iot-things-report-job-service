@@ -1,17 +1,18 @@
 import json
-import logging
 import uuid
 
 import boto3
 from botocore.exceptions import ClientError
 
-from util.service_util import create_archive_job_message
+from schemas import ThingPayload
+from util.service_util import create_archive_job_message, get_thing_payloads
 from config import (
     THINGS_REPORT_JOB_QUEUE,
     AWS_REGION,
     THINGS_REPORT_ARCHIVE_JOB_QUEUE,
     THINGS_REPORT_JOB_DLQ,
     QUEUE_WAIT_SECONDS,
+    get_logger,
 )
 from util.s3_util import (
     write_data_to_csv,
@@ -20,7 +21,7 @@ from util.s3_util import (
     s3_upload_csv,
 )
 
-log = logging.getLogger("things_report_job_service")
+log = get_logger()
 
 
 class ThingsReportJobService:
@@ -65,12 +66,15 @@ class ThingsReportJobService:
 
             await self.produce([archive_message])
         else:
+            response_body = get_thing_payloads(start_timestamp, end_timestamp)
+
             await self.upload_csv_job(
                 user_id,
                 report_name,
                 job_index,
                 start_timestamp,
                 end_timestamp,
+                response_body,
             )
 
     async def poll(self) -> None:
@@ -103,7 +107,13 @@ class ThingsReportJobService:
             raise error
 
     async def upload_csv_job(
-        self, user_id, report_name, job_index, start_timestamp, end_timestamp
+        self,
+        user_id: str,
+        report_name: str,
+        job_index: int,
+        start_timestamp: str,
+        end_timestamp: str,
+        response_body: list[ThingPayload],
     ) -> None:
         log.debug("Uploading job csv file...")
 
@@ -118,9 +128,7 @@ class ThingsReportJobService:
         )
 
         try:
-            csv_data_rows: list[dict] = await create_csv_rows(
-                user_id, start_timestamp, end_timestamp
-            )
+            csv_data_rows: list[dict] = create_csv_rows(user_id, response_body)
 
             write_data_to_csv(report_job_file_path, report_job_filename, csv_data_rows)
 

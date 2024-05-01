@@ -1,16 +1,16 @@
 import json
-import logging
 import time
 import uuid
 from typing import Any
 
+from config import get_logger
 from tests.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX, QUEUE_WAIT_SECONDS
 from util.s3_util import isodate_to_timestamp
 from tests.helper.helper import validate_uuid4
 from things_report_job_service.service import ThingsReportJobService
 from util.service_util import create_archive_job_message
 
-log = logging.getLogger("test_things_report_job_service")
+log = get_logger()
 
 
 def expected_archive_job_message(message: dict) -> list[dict]:

@@ -1,16 +1,17 @@
 import csv
-import logging
 import os
 
 from schemas import ThingPayload, CSVRow
-from .service_util import (
-    create_default_epoch_timestamps,
+from util.service_util import (
     isodate_to_timestamp,
 )
-from config import THINGS_REPORT_JOB_BUCKET_NAME, THINGS_REPORT_JOB_FILE_PATH_PREFIX
-from crud import find_thing_payloads_by_timestamps
+from config import (
+    THINGS_REPORT_JOB_BUCKET_NAME,
+    THINGS_REPORT_JOB_FILE_PATH_PREFIX,
+    get_logger,
+)
 
-log = logging.getLogger("things_report_job_service")
+log = get_logger()
 
 
 def create_csv_report_job_path(
@@ -31,10 +32,9 @@ def create_csv_report_job_path(
 
 
 def create_csv_row(user_id: str, thing_payload: ThingPayload) -> dict:
-    device_id = thing_payload.device_id
-    payload_timestamp = thing_payload.payload_timestamp
-
-    payload = thing_payload.payload
+    device_id = thing_payload["device_id"]
+    payload_timestamp = thing_payload["payload_timestamp"]
+    payload = thing_payload["payload"]
     cadence = payload["cadence"]
     battery = payload["battery"]
     temperature = payload["temperature"]
@@ -57,22 +57,10 @@ def create_csv_row(user_id: str, thing_payload: ThingPayload) -> dict:
     )
 
 
-async def create_csv_rows(
-    user_id: str, start_timestamp: str, end_timestamp: str
-) -> list[dict]:
-    if not start_timestamp or not end_timestamp:
-        start_timestamp, end_timestamp = create_default_epoch_timestamps()
-    else:
-        start_timestamp = isodate_to_timestamp(start_timestamp)
-        end_timestamp = isodate_to_timestamp(end_timestamp)
-
-    thing_payloads_result = await find_thing_payloads_by_timestamps(
-        start_timestamp, end_timestamp
-    )
-
+def create_csv_rows(user_id: str, response_body: list[ThingPayload]) -> list[dict]:
     csv_rows: list[dict] = []
 
-    for item in thing_payloads_result:
+    for item in response_body:
         csv_rows.append(create_csv_row(user_id, item))
 
     return csv_rows

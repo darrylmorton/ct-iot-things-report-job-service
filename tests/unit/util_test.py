@@ -1,8 +1,8 @@
-import logging
 import datetime
 
 import uuid
 
+from config import get_logger
 from tests.config import THINGS_REPORT_JOB_FILE_PATH_PREFIX
 from util.s3_util import create_csv_report_job_path
 from util.service_util import (
@@ -10,7 +10,7 @@ from util.service_util import (
     isodate_to_timestamp,
 )
 
-log = logging.getLogger("test_things_report_job_service")
+log = get_logger()
 
 
 class TestUtil:
@@ -18,13 +18,16 @@ class TestUtil:
     report_name = "report_name_0"
     job_index = 0
     start_timestamp = "2024-04-12T00:00:00Z"
-    start_epoch_timestamp = 1712880000
+    start_epoch_timestamp = isodate_to_timestamp(start_timestamp)
     end_timestamp = "2024-04-12T23:59:59Z"
+    end_epoch_timestamp = isodate_to_timestamp(end_timestamp)
     # fmt: off
     job_file_path_prefix = (
-        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-1712880000-1712966399"
+        f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
     )
-    job_upload_path = f"{user_id}/{report_name}-1712880000-1712966399"
+    job_upload_path = (
+        f"{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
+    )
     job_path_suffix = f"{report_name}-{0}.csv"
 
     def test_csv_report_job_path(self):

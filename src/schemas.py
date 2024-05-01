@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class PayloadValueUnit(BaseModel):
-    value: str
+    value: str | int | float
     unit: str
 
     class ConfigDict:
@@ -35,9 +35,9 @@ class Payload(BaseModel):
 
 class ThingPayload(BaseModel):
     id: str
-    device_id: str = Field(alias="deviceId")
-    thing_payload: Payload = Field(alias="thingPayload")
-    payload_timestamp: int = Field(alias="payloadTimestamp")
+    device_id: str
+    payload: Payload
+    payload_timestamp: int
 
     class ConfigDict:
         from_attributes = True
