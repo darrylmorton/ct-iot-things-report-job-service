@@ -6,7 +6,6 @@ import pytest
 import uuid
 
 from config import get_logger
-from tests.helper.db_helper import assert_thing_payloads, create_thing_payloads_data
 from tests.helper.archive_job_helper import (
     expected_archive_job_message,
     report_archive_job_consumer,
@@ -44,7 +43,6 @@ class TestJobService:
     start_epoch_timestamp = isodate_to_timestamp(start_timestamp)
     end_timestamp = "2020-06-23T12:00:00Z"
     end_epoch_timestamp = isodate_to_timestamp(end_timestamp)
-    log.info(f"{start_epoch_timestamp=} {end_epoch_timestamp=}")
     # fmt: off
     job_file_path_prefix = (
         f"{THINGS_REPORT_JOB_FILE_PATH_PREFIX}/{user_id}/{report_name}-{start_epoch_timestamp}-{end_epoch_timestamp}"
@@ -67,7 +65,6 @@ class TestJobService:
         message_batch_one = create_job_messages(
             self.start_timestamp, self.end_timestamp
         )
-        log.info(f"{message_batch_one=}")
 
         expected_archive_job_message_batch_one = expected_archive_job_message(
             message_batch_one[2]
@@ -117,17 +114,6 @@ class TestJobService:
             f"{actual_result_file_path}/{actual_result_filename}",
             f"{actual_result_upload_path}/{actual_result_filename}",
         )
-
-    @pytest.mark.skip
-    async def test_find_payloads_by_timestamps(self):
-        start = self.start_epoch_timestamp
-        end = self.end_epoch_timestamp
-
-        expected_result = create_thing_payloads_data()
-
-        actual_result = await find_thing_payloads_by_timestamps(start, end)
-
-        assert_thing_payloads(actual_result, expected_result)
 
     @pytest.mark.skip
     async def test_job_consumer_dlq(self, job_service):
